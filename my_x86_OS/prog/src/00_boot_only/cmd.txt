@@ -1,0 +1,5 @@
+as -nostdlib -a=boot.lst -o boot.img boot.s
+ld -N -e start -Ttext=0x7c00 -o boot.o boot.img
+objcopy -O binary boot.o boot.bin
+ld -melf_i386 -T test.ld test.o -o test.bin -nostdlib --nmagic
+gcc -c test.s -m16

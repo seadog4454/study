@@ -1,0 +1,58 @@
+GAS LISTING boot.s 			page 1
+
+
+   1              	.equ BOOT_LOAD, 0x7C00
+   2              	
+   3              	
+   4              	
+   5              	.code16
+   6              	.text
+   7              	.global start
+   8              	
+   9              	start:
+  10 0000 EB56     	  jmp ipl
+  11              	
+  12              	  # BPB
+  13 0002 90909090 	  .org 90 - (. - start), 0x90
+  13      90909090 
+  13      90909090 
+  13      90909090 
+  13      90909090 
+  14              	
+  15              	  # IPL
+  16              	 ipl:
+  17 0058 FA       	  cli
+  18 0059 B80000   	  mov $0x0000, %ax
+  19 005c 89C2     	  mov %ax, %dx
+  20 005e 8EC0     	  mov %ax, %es
+  21 0060 8ED0     	  mov %ax, %ss
+  22 0062 BC007C   	  mov $BOOT_LOAD, %sp
+  23 0065 FB       	  sti
+  24 0066 88160000 	  movb %dl, drive
+  25              	  
+  26 006a B041     	  mov $0x41, %al
+  27 006c B40E     	  mov $0x0E, %ah
+  28              	  #mov $0x0000, %bx
+  29 006e CD10     	  int $0x10
+  30              	
+  31 0070 EBFE     	  jmp .
+  32              	
+  33              	.align 2
+  34              	BOOT:
+  35              	  # .fill 0x18c, 0x1, 0x0
+  36              	  # .org 510 - (. - ipl - 0x19), 0x0
+  37 0072 55AA     	  .word 0xAA55
+  38              	
+  39              	.data
+  40 0000 BB       	  drive: .byte 0xBB
+GAS LISTING boot.s 			page 2
+
+
+DEFINED SYMBOLS
+              boot.s:1      *ABS*:0000000000007c00 BOOT_LOAD
+              boot.s:9      .text:0000000000000000 start
+              boot.s:16     .text:0000000000000058 ipl
+              boot.s:40     .data:0000000000000000 drive
+              boot.s:34     .text:0000000000000072 BOOT
+
+NO UNDEFINED SYMBOLS

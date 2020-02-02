@@ -1,0 +1,116 @@
+GAS LISTING boot.s 			page 1
+
+
+   1              	.code16
+   2              	.text
+   3              	.global _start
+   4              	
+   5              	
+   6              	
+   7              	_start:
+   8 0000 EB56     	  jmp ipl
+   9              	
+  10              	  # BPB
+  11              	  
+  12 0002 90909090 	  .org 90 - (. - _start), 0x90
+  12      90909090 
+  12      90909090 
+  12      90909090 
+  12      90909090 
+  13              	
+  14              	  # IPL
+  15              	 ipl:
+  16 0058 FA       	  cli
+  17 0059 B80000   	  mov $0x0000, %ax
+  18 005c 89C2     	  mov %ax, %dx
+  19 005e 8EC0     	  mov %ax, %es
+  20 0060 8ED0     	  mov %ax, %ss
+  21 0062 8B260000 	  mov (BOOT_LOAD), %sp
+  22 0066 FB       	  sti
+  23 0067 88160000 	  mov %dl, drive
+  24              	  
+  25              	
+  26              	  # push $0x41
+  27              	  # call putc
+  28              	  # add $2, %sp
+  29              	  
+  30              	  
+  31 006b 680000   	  push $s0
+  32 006e E80500   	  call puts
+  33 0071 83C404   	  add $4, %sp
+  34              	
+  35 0074 EBFE     	  jmp .
+  36              	
+  37              	
+  38              	#.include "../modules/real/putc.s"
+  39              	.include "../modules/real/puts.s"
+   1              	.code16
+   2              	
+   3              	puts:
+   4 0076 55       	  push %bp
+   5 0077 89E5     	  mov %sp, %bp
+   6              	
+   7 0079 50       	  push %ax
+   8 007a 53       	  push %bx
+   9 007b 56       	  push %si #arg1: pointer of strings
+  10              	
+  11 007c 8B7604   	  mov 0x4(%bp), %si
+  12              	
+  13 007f B40E     	  mov $0x0E, %ah # output one char
+  14 0081 BB0000   	  mov $0x0000, %bx
+GAS LISTING boot.s 			page 2
+
+
+  15 0084 FC       	  cld # DF = 0
+  16              	
+  17              	  
+  18              	/*
+  19              	for(i=0, AL != null; AL++){
+  20              	  int 0x10 # put AL
+  21              	}
+  22              	*/
+  23              	
+  24              	
+  25              	.loop1:
+  26 0085 AC       	  lodsb # AL = *SI++
+  27 0086 3C00     	  cmp $0, %al
+  28 0088 7404     	  je .L1
+  29              	  
+  30 008a CD10     	  int $0x10
+  31 008c EBF7     	  jmp .loop1
+  32              	
+  33              	.L1:
+  34              	
+  35 008e 5E       	  pop %si
+  36 008f 5B       	  pop %bx
+  37 0090 58       	  pop %ax
+  38              	
+  39 0091 89EC     	  mov %bp, %sp
+  40 0093 5D       	  pop %bp
+  41              	
+  42 0094 C3       	  ret
+  43              	 
+  40              	
+  41 0095 90       	.align 2
+  42              	 BOOT:
+  43              	
+  44              	
+  45              	.data
+  46 0000 BB       	  drive: .byte 0xBB
+  47 0001 007C     	  BOOT_LOAD: .word 0x7C00
+  48 0003 426F6F74 	  s0: .string "Booting"
+  48      696E6700 
+GAS LISTING boot.s 			page 3
+
+
+DEFINED SYMBOLS
+              boot.s:7      .text:0000000000000000 _start
+              boot.s:15     .text:0000000000000058 ipl
+              boot.s:47     .data:0000000000000001 BOOT_LOAD
+              boot.s:46     .data:0000000000000000 drive
+              boot.s:48     .data:0000000000000003 s0
+../modules/real/puts.s:3      .text:0000000000000076 puts
+../modules/real/puts.s:25     .text:0000000000000085 .loop1
+              boot.s:42     .text:0000000000000096 BOOT
+
+NO UNDEFINED SYMBOLS
