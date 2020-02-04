@@ -35,25 +35,24 @@ itoa:
 
 
 # detect signed variable
-  test $0b0010, %bx
-  jnz .Litoa1
+  test $0b0001, %bx
+  jz .Litoa1
   cmp $0, %ax
   jge .Litoa2
   or $0b0010, %bx
 .Litoa1: 
 .Litoa2:
-  cmp $0, %ax
 
 # detect add +/- sign
   test $0b0010, %bx
-  jnz .Litoa3
+  jz .Litoa3
   cmp $0, %ax
   jge .Litoa4
   neg %ax
-  mov $0x2d, (%si) # 0x2d == '-'
+  movb $0x2d, (%si) # 0x2d == '-'
   jmp .Litoa5
-.Litoa4
-  mov $0x2b, (%si) # 0x2b == '+'
+.Litoa4:
+  movb $0x2b, (%si) # 0x2b == '+'
 .Litoa5:
   dec %cx
 .Litoa3:
@@ -61,17 +60,16 @@ itoa:
 # convert to ascii
   mov 0xa(%bp), %bx
 .LitoaLOOP1:
-  mov $0, dx
+  mov $0, %dx
   div %bx
   mov %dx, %si
-  mov %si(ascii_table), %dl
+  movb ascii_table(%si), %dl
   mov %dl, (%di)
   dec %di
   cmp $0, %ax
   loopnz .LitoaLOOP1
 .LotpaLOOPEND1:
-  
-  ascii_table: .string "0123456789ABCDEF"
+
 
 # 0 padding in the space
   cmp $0, %cx
@@ -83,7 +81,7 @@ itoa:
 .Litoa7:
   std
   rep stosb
-.Litoa6
+.Litoa6:
 
 # return register
   pop %di
@@ -97,3 +95,7 @@ itoa:
   mov %bp, %sp
   pop %bp
   ret
+
+
+
+ascii_table: .string "0123456789ABCDEF"

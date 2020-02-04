@@ -36,32 +36,49 @@ GAS LISTING boot.s 			page 1
   29              	  
   30              	  
   31 006b 680000   	  push $s0
-  32 006e E80500   	  call puts
-  33 0071 83C404   	  add $4, %sp
+  32 006e E81A00   	  call puts
+  33 0071 83C402   	  add $2, %sp
   34              	
-  35 0074 EBFE     	  jmp .
-  36              	
-  37              	
-  38              	#.include "../modules/real/putc.s"
-  39              	.include "../modules/real/puts.s"
-   1              	.code16
-   2              	
-   3              	puts:
-   4 0076 55       	  push %bp
-   5 0077 89E5     	  mov %sp, %bp
-   6              	
-   7 0079 50       	  push %ax
-   8 007a 53       	  push %bx
-   9 007b 56       	  push %si #arg1: pointer of strings
-  10              	
-  11 007c 8B7604   	  mov 0x4(%bp), %si
-  12              	
-  13 007f B40E     	  mov $0x0E, %ah # output one char
-  14 0081 BB0000   	  mov $0x0000, %bx
+  35              	
+  36              	  #push $8086
+  37              	  #push $s1
+  38              	  #push $8
+  39              	  #push $10
+  40              	  #push $0b0001
+  41              	
+  42 0074 6A01     	  push $0b0001
+  43 0076 6A0A     	  push $10
+  44 0078 6A08     	  push $8
+  45 007a 680000   	  push $s1
+  46 007d 686AE0   	  pushw $-8086
+  47 0080 E82700   	  call itoa
+  48              	
+  49 0083 680000   	  push $s1
+  50 0086 E80200   	  call puts  
+  51              	
+  52 0089 EBFE     	  jmp .
+  53              	
 GAS LISTING boot.s 			page 2
 
 
-  15 0084 FC       	  cld # DF = 0
+  54              	
+  55              	#.include "../modules/real/putc.s"
+  56              	.include "../modules/real/puts.s"
+   1              	.code16
+   2              	
+   3              	puts:
+   4 008b 55       	  push %bp
+   5 008c 89E5     	  mov %sp, %bp
+   6              	
+   7 008e 50       	  push %ax
+   8 008f 53       	  push %bx
+   9 0090 56       	  push %si #arg1: pointer of strings
+  10              	
+  11 0091 8B7604   	  mov 0x4(%bp), %si
+  12              	
+  13 0094 B40E     	  mov $0x0E, %ah # output one char
+  14 0096 BB0000   	  mov $0x0000, %bx
+  15 0099 FC       	  cld # DF = 0
   16              	
   17              	  
   18              	/*
@@ -72,45 +89,163 @@ GAS LISTING boot.s 			page 1
   23              	
   24              	
   25              	.loop1:
-  26 0085 AC       	  lodsb # AL = *SI++
-  27 0086 3C00     	  cmp $0, %al
-  28 0088 7404     	  je .L1
+  26 009a AC       	  lodsb # AL = *SI++
+  27 009b 3C00     	  cmp $0, %al
+  28 009d 7404     	  je .L1
   29              	  
-  30 008a CD10     	  int $0x10
-  31 008c EBF7     	  jmp .loop1
+  30 009f CD10     	  int $0x10
+  31 00a1 EBF7     	  jmp .loop1
   32              	
   33              	.L1:
   34              	
-  35 008e 5E       	  pop %si
-  36 008f 5B       	  pop %bx
-  37 0090 58       	  pop %ax
+  35 00a3 5E       	  pop %si
+  36 00a4 5B       	  pop %bx
+  37 00a5 58       	  pop %ax
   38              	
-  39 0091 89EC     	  mov %bp, %sp
-  40 0093 5D       	  pop %bp
+  39 00a6 89EC     	  mov %bp, %sp
+  40 00a8 5D       	  pop %bp
   41              	
-  42 0094 C3       	  ret
+  42 00a9 C3       	  ret
   43              	 
-  40              	
-  41 0095 90       	.align 2
-  42              	 BOOT:
-  43              	
-  44              	
-  45              	.data
-  46 0000 BB       	  drive: .byte 0xBB
-  47 0001 007C     	  BOOT_LOAD: .word 0x7C00
-  48 0003 426F6F74 	  s0: .string "Booting"
-  48      696E6700 
+  57              	.include "../modules/real/itoa.s"
+   1              	.code16
+   2              	
+   3              	# void itoa(num, buff, size, radix, flag)
+   4              	# num:source addr
+   5              	# buff:dist addr
+   6              	# radix:set 2, 8, 10, or 16 
+   7              	# flag:When set 
+   8              	#                 1st bit: 0 padding on space
+   9              	#                 2nd bit: add +/- sign
+  10              	#                 3rd bit: treat as signed variable 
 GAS LISTING boot.s 			page 3
+
+
+  11              	
+  12              	
+  13              	itoa:
+  14 00aa 55       	  push %bp
+  15 00ab 89E5     	  mov %sp, %bp
+  16              	
+  17              	# store register
+  18 00ad 50       	  push %ax
+  19 00ae 53       	  push %bx
+  20 00af 51       	  push %cx
+  21 00b0 52       	  push %dx
+  22 00b1 56       	  push %si
+  23 00b2 57       	  push %di
+  24              	
+  25              	# get arguments
+  26 00b3 8B4604   	  mov 0x4(%bp), %ax # num
+  27 00b6 8B7606   	  mov 0x6(%bp), %si # buff
+  28 00b9 8B4E08   	  mov 0x8(%bp), %cx # size
+  29 00bc 8B5E0C   	  mov 0xc(%bp), %bx # flag
+  30              	# The remaining arguments(radix: 0xa(%bp) ) will be assigend later.
+  31 00bf 89F7     	  mov %si, %di
+  32 00c1 01CF     	  add %cx, %di
+  33 00c3 4F       	  dec %di
+  34              	
+  35              	
+  36              	
+  37              	# detect signed variable
+  38 00c4 F7C30100 	  test $0b0001, %bx
+  39 00c8 7408     	  jz .Litoa1
+  40 00ca 83F800   	  cmp $0, %ax
+  41 00cd 7D03     	  jge .Litoa2
+  42 00cf 83CB02   	  or $0b0010, %bx
+  43              	.Litoa1: 
+  44              	.Litoa2:
+  45              	
+  46              	# detect add +/- sign
+  47 00d2 F7C30200 	  test $0b0010, %bx
+  48 00d6 7410     	  jz .Litoa3
+  49 00d8 83F800   	  cmp $0, %ax
+  50 00db 7D07     	  jge .Litoa4
+  51 00dd F7D8     	  neg %ax
+  52 00df C6042D   	  movb $0x2d, (%si) # 0x2d == '-'
+  53 00e2 EB03     	  jmp .Litoa5
+  54              	.Litoa4:
+  55 00e4 C6042B   	  movb $0x2b, (%si) # 0x2b == '+'
+  56              	.Litoa5:
+  57 00e7 49       	  dec %cx
+  58              	.Litoa3:
+  59              	
+  60              	# convert to ascii
+  61 00e8 8B5E0A   	  mov 0xa(%bp), %bx
+  62              	.LitoaLOOP1:
+  63 00eb BA0000   	  mov $0, %dx
+  64 00ee F7F3     	  div %bx
+  65 00f0 89D6     	  mov %dx, %si
+  66 00f2 8A940000 	  movb ascii_table(%si), %dl
+  67 00f6 8815     	  mov %dl, (%di)
+GAS LISTING boot.s 			page 4
+
+
+  68 00f8 4F       	  dec %di
+  69 00f9 83F800   	  cmp $0, %ax
+  70 00fc E0ED     	  loopnz .LitoaLOOP1
+  71              	.LotpaLOOPEND1:
+  72              	
+  73              	
+  74              	# 0 padding in the space
+  75 00fe 83F900   	  cmp $0, %cx
+  76 0101 740D     	  je .Litoa6
+  77 0103 B020     	  mov $0x20, %al
+  78 0105 837E0C04 	  cmp $0b0100, 0xc(%bp)
+  79 0109 7502     	  jne .Litoa7
+  80 010b B030     	  mov $0x30, %al
+  81              	.Litoa7:
+  82 010d FD       	  std
+  83 010e F3AA     	  rep stosb
+  84              	.Litoa6:
+  85              	
+  86              	# return register
+  87 0110 5F       	  pop %di
+  88 0111 5E       	  pop %si
+  89 0112 5A       	  pop %dx
+  90 0113 59       	  pop %cx
+  91 0114 5B       	  pop %bx
+  92 0115 58       	  pop %ax
+  93              	
+  94              	# destroy stack frame
+  95 0116 89EC     	  mov %bp, %sp
+  96 0118 5D       	  pop %bp
+  97 0119 C3       	  ret
+  98              	
+  99              	
+ 100              	
+ 101 011a 30313233 	ascii_table: .string "0123456789ABCDEF"
+ 101      34353637 
+ 101      38394142 
+ 101      43444546 
+ 101      00
+  58              	
+  59 012b 90       	.align 2
+  60              	 BOOT:
+  61              	
+  62              	
+  63              	.data
+  64 0000 BB       	  drive: .byte 0xBB
+  65 0001 007C     	  BOOT_LOAD: .word 0x7C00
+  66 0003 426F6F74 	  s0: .string "Booting"
+  66      696E6700 
+  67 000b 2D2D2D2D 	  s1: .string "--------"
+  67      2D2D2D2D 
+  67      00
+GAS LISTING boot.s 			page 5
 
 
 DEFINED SYMBOLS
               boot.s:7      .text:0000000000000000 _start
               boot.s:15     .text:0000000000000058 ipl
-              boot.s:47     .data:0000000000000001 BOOT_LOAD
-              boot.s:46     .data:0000000000000000 drive
-              boot.s:48     .data:0000000000000003 s0
-../modules/real/puts.s:3      .text:0000000000000076 puts
-../modules/real/puts.s:25     .text:0000000000000085 .loop1
-              boot.s:42     .text:0000000000000096 BOOT
+              boot.s:65     .data:0000000000000001 BOOT_LOAD
+              boot.s:64     .data:0000000000000000 drive
+              boot.s:66     .data:0000000000000003 s0
+../modules/real/puts.s:3      .text:000000000000008b puts
+              boot.s:67     .data:000000000000000b s1
+../modules/real/itoa.s:13     .text:00000000000000aa itoa
+../modules/real/puts.s:25     .text:000000000000009a .loop1
+../modules/real/itoa.s:101    .text:000000000000011a ascii_table
+              boot.s:60     .text:000000000000012c BOOT
 
 NO UNDEFINED SYMBOLS
