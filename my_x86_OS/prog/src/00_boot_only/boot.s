@@ -32,29 +32,27 @@ _start:
   call puts
   add $2, %sp
 
-
-  #push $8086
-  #push $s1
-  #push $8
-  #push $10
-  #push $0b0001
-
-  push $0b0001
+/*
+  push $0b0000
   push $10
   push $8
   push $s1
-  pushw $-8086
+  pushw $15
   call itoa
 
   push $s1
   call puts  
+*/
 
+  call reboot
+  add $2, %sp
   jmp .
 
 
 #.include "../modules/real/putc.s"
 .include "../modules/real/puts.s"
 .include "../modules/real/itoa.s"
+.include "../modules/real/reboot.s"
 
 .align 2
  BOOT:
@@ -63,5 +61,5 @@ _start:
 .data
   drive: .byte 0xBB
   BOOT_LOAD: .word 0x7C00
-  s0: .string "Booting"
+  s0: .string "Booting..."
   s1: .string "--------"
