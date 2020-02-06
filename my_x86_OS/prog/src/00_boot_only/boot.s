@@ -20,7 +20,7 @@ _start:
   mov %ax, %ss
   mov (BOOT_LOAD), %sp
   sti
-  mov %dl, drive
+  mov %dl, (boot_drive)
   
 
   # push $0x41
@@ -43,10 +43,24 @@ _start:
   push $s1
   call puts  
 */
-
+  
+# read 512 bytes : read sector
+  mov $0x02, %ah # instruct read
+  mov $0x1, %al # number of reading sector
+  mov $0x0002, %cx # cylinder/sector
+  mov $0x00, %dh # head position
+  mov $0x80, %dl
+  # mov (boot_drive), %dl # drive number
+  mov $0x7F00, %bx # offset
+  int $0x13 # bios call : read sector
+  jnc .Lboot1
+  push $e0
+  call puts
+  add $0x2, %sp
   call reboot
   add $2, %sp
-  jmp .
+.Lboot1:
+  jmp stage_2
 
 
 #.include "../modules/real/putc.s"
@@ -54,12 +68,22 @@ _start:
 .include "../modules/real/itoa.s"
 .include "../modules/real/reboot.s"
 
+s0: .string "Booting...\r\n"
+s1: .string "--------\r\n"
+e0: .string "Error:sector read\r\n"
+BOOT_LOAD: .word 0x7C00
+
 .align 2
- BOOT:
+# BOOT:
+# drive: .byte 0xBB
+boot_drive: .word 0x0000
 
 
-.data
-  drive: .byte 0xBB
-  BOOT_LOAD: .word 0x7C00
-  s0: .string "Booting..."
-  s1: .string "--------"
+stage_2:
+  push $s2
+  call puts
+  add $0x2, %sp
+  jmp .
+
+s2: .string "2nd stage...\r\n"
+ 

@@ -20,4 +20,9 @@ SECTIONS{
   .sig : {
     SHORT(0xAA55);
   }
+  
+  . = 0x7E00;
+  stage_2 : {
+  	*(stage_2);
+  }
 }

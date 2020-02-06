@@ -27,7 +27,7 @@ GAS LISTING boot.s 			page 1
   20 0060 8ED0     	  mov %ax, %ss
   21 0062 8B260000 	  mov (BOOT_LOAD), %sp
   22 0066 FB       	  sti
-  23 0067 88160000 	  mov %dl, drive
+  23 0067 88160000 	  mov %dl, (boot_drive)
   24              	  
   25              	
   26              	  # push $0x41
@@ -36,7 +36,7 @@ GAS LISTING boot.s 			page 1
   29              	  
   30              	  
   31 006b 680000   	  push $s0
-  32 006e E80B00   	  call puts
+  32 006e E82700   	  call puts
   33 0071 83C402   	  add $2, %sp
   34              	
   35              	/*
@@ -50,32 +50,46 @@ GAS LISTING boot.s 			page 1
   43              	  push $s1
   44              	  call puts  
   45              	*/
-  46              	
-  47 0074 E8A500   	  call reboot
-  48 0077 83C402   	  add $2, %sp
-  49 007a EBFE     	  jmp .
-  50              	
-  51              	
-  52              	#.include "../modules/real/putc.s"
-  53              	.include "../modules/real/puts.s"
+  46              	  
+  47              	# read 512 bytes : read sector
+  48 0074 B402     	  mov $0x02, %ah # instruct read
+  49 0076 B001     	  mov $0x1, %al # number of reading sector
+  50 0078 B90200   	  mov $0x0002, %cx # cylinder/sector
+  51 007b B600     	  mov $0x00, %dh # head position
+  52 007d B280     	  mov $0x80, %dl
+  53              	  # mov (boot_drive), %dl # drive number
 GAS LISTING boot.s 			page 2
 
 
+  54 007f BB007F   	  mov $0x7F00, %bx # offset
+  55 0082 CD13     	  int $0x13 # bios call : read sector
+  56 0084 730F     	  jnc .Lboot1
+  57 0086 680000   	  push $e0
+  58 0089 E80C00   	  call puts
+  59 008c 83C402   	  add $0x2, %sp
+  60 008f E8A600   	  call reboot
+  61 0092 83C402   	  add $2, %sp
+  62              	.Lboot1:
+  63 0095 E91001   	  jmp stage_2
+  64              	
+  65              	
+  66              	#.include "../modules/real/putc.s"
+  67              	.include "../modules/real/puts.s"
    1              	.code16
    2              	
    3              	puts:
-   4 007c 55       	  push %bp
-   5 007d 89E5     	  mov %sp, %bp
+   4 0098 55       	  push %bp
+   5 0099 89E5     	  mov %sp, %bp
    6              	
-   7 007f 50       	  push %ax
-   8 0080 53       	  push %bx
-   9 0081 56       	  push %si #arg1: pointer of strings
+   7 009b 50       	  push %ax
+   8 009c 53       	  push %bx
+   9 009d 56       	  push %si #arg1: pointer of strings
   10              	
-  11 0082 8B7604   	  mov 0x4(%bp), %si
+  11 009e 8B7604   	  mov 0x4(%bp), %si
   12              	
-  13 0085 B40E     	  mov $0x0E, %ah # output one char
-  14 0087 BB0000   	  mov $0x0000, %bx
-  15 008a FC       	  cld # DF = 0
+  13 00a1 B40E     	  mov $0x0E, %ah # output one char
+  14 00a3 BB0000   	  mov $0x0000, %bx
+  15 00a6 FC       	  cld # DF = 0
   16              	
   17              	  
   18              	/*
@@ -86,25 +100,28 @@ GAS LISTING boot.s 			page 1
   23              	
   24              	
   25              	.loop1:
-  26 008b AC       	  lodsb # AL = *SI++
-  27 008c 3C00     	  cmp $0, %al
-  28 008e 7404     	  je .L1
+  26 00a7 AC       	  lodsb # AL = *SI++
+  27 00a8 3C00     	  cmp $0, %al
+  28 00aa 7404     	  je .L1
   29              	  
-  30 0090 CD10     	  int $0x10
-  31 0092 EBF7     	  jmp .loop1
+  30 00ac CD10     	  int $0x10
+  31 00ae EBF7     	  jmp .loop1
   32              	
   33              	.L1:
   34              	
-  35 0094 5E       	  pop %si
-  36 0095 5B       	  pop %bx
-  37 0096 58       	  pop %ax
+  35 00b0 5E       	  pop %si
+  36 00b1 5B       	  pop %bx
+  37 00b2 58       	  pop %ax
   38              	
-  39 0097 89EC     	  mov %bp, %sp
-  40 0099 5D       	  pop %bp
+  39 00b3 89EC     	  mov %bp, %sp
+  40 00b5 5D       	  pop %bp
   41              	
-  42 009a C3       	  ret
+  42 00b6 C3       	  ret
   43              	 
-  54              	.include "../modules/real/itoa.s"
+GAS LISTING boot.s 			page 3
+
+
+  68              	.include "../modules/real/itoa.s"
    1              	.code16
    2              	
    3              	# void itoa(num, buff, size, radix, flag)
@@ -118,168 +135,185 @@ GAS LISTING boot.s 			page 1
   11              	
   12              	
   13              	itoa:
-GAS LISTING boot.s 			page 3
-
-
-  14 009b 55       	  push %bp
-  15 009c 89E5     	  mov %sp, %bp
+  14 00b7 55       	  push %bp
+  15 00b8 89E5     	  mov %sp, %bp
   16              	
   17              	# store register
-  18 009e 50       	  push %ax
-  19 009f 53       	  push %bx
-  20 00a0 51       	  push %cx
-  21 00a1 52       	  push %dx
-  22 00a2 56       	  push %si
-  23 00a3 57       	  push %di
+  18 00ba 50       	  push %ax
+  19 00bb 53       	  push %bx
+  20 00bc 51       	  push %cx
+  21 00bd 52       	  push %dx
+  22 00be 56       	  push %si
+  23 00bf 57       	  push %di
   24              	
   25              	# get arguments
-  26 00a4 8B4604   	  mov 0x4(%bp), %ax # num
-  27 00a7 8B7606   	  mov 0x6(%bp), %si # buff
-  28 00aa 8B4E08   	  mov 0x8(%bp), %cx # size
-  29 00ad 8B5E0C   	  mov 0xc(%bp), %bx # flag
+  26 00c0 8B4604   	  mov 0x4(%bp), %ax # num
+  27 00c3 8B7606   	  mov 0x6(%bp), %si # buff
+  28 00c6 8B4E08   	  mov 0x8(%bp), %cx # size
+  29 00c9 8B5E0C   	  mov 0xc(%bp), %bx # flag
   30              	# The remaining arguments(radix: 0xa(%bp) ) will be assigend later.
-  31 00b0 89F7     	  mov %si, %di
-  32 00b2 01CF     	  add %cx, %di
-  33 00b4 4F       	  dec %di
+  31 00cc 89F7     	  mov %si, %di
+  32 00ce 01CF     	  add %cx, %di
+  33 00d0 4F       	  dec %di
   34              	
   35              	
   36              	
   37              	# detect signed variable
-  38 00b5 F7C30100 	  test $0b0001, %bx
-  39 00b9 7408     	  jz .Litoa1
-  40 00bb 83F800   	  cmp $0, %ax
-  41 00be 7D03     	  jge .Litoa2
-  42 00c0 83CB02   	  or $0b0010, %bx
+  38 00d1 F7C30100 	  test $0b0001, %bx
+  39 00d5 7408     	  jz .Litoa1
+  40 00d7 83F800   	  cmp $0, %ax
+  41 00da 7D03     	  jge .Litoa2
+  42 00dc 83CB02   	  or $0b0010, %bx
   43              	.Litoa1: 
   44              	.Litoa2:
   45              	
   46              	# detect add +/- sign
-  47 00c3 F7C30200 	  test $0b0010, %bx
-  48 00c7 7410     	  jz .Litoa3
-  49 00c9 83F800   	  cmp $0, %ax
-  50 00cc 7D07     	  jge .Litoa4
-  51 00ce F7D8     	  neg %ax
-  52 00d0 C6042D   	  movb $0x2d, (%si) # 0x2d == '-'
-  53 00d3 EB03     	  jmp .Litoa5
+  47 00df F7C30200 	  test $0b0010, %bx
+  48 00e3 7410     	  jz .Litoa3
+  49 00e5 83F800   	  cmp $0, %ax
+  50 00e8 7D07     	  jge .Litoa4
+  51 00ea F7D8     	  neg %ax
+  52 00ec C6042D   	  movb $0x2d, (%si) # 0x2d == '-'
+  53 00ef EB03     	  jmp .Litoa5
   54              	.Litoa4:
-  55 00d5 C6042B   	  movb $0x2b, (%si) # 0x2b == '+'
+  55 00f1 C6042B   	  movb $0x2b, (%si) # 0x2b == '+'
   56              	.Litoa5:
-  57 00d8 49       	  dec %cx
-  58              	.Litoa3:
-  59              	
-  60              	# convert to ascii
-  61 00d9 8B5E0A   	  mov 0xa(%bp), %bx
-  62              	.LitoaLOOP1:
-  63 00dc BA0000   	  mov $0, %dx
-  64 00df F7F3     	  div %bx
-  65 00e1 89D6     	  mov %dx, %si
-  66 00e3 8A940000 	  movb ascii_table(%si), %dl
-  67 00e7 8815     	  mov %dl, (%di)
-  68 00e9 4F       	  dec %di
-  69 00ea 83F800   	  cmp $0, %ax
-  70 00ed E0ED     	  loopnz .LitoaLOOP1
 GAS LISTING boot.s 			page 4
 
 
+  57 00f4 49       	  dec %cx
+  58              	.Litoa3:
+  59              	
+  60              	# convert to ascii
+  61 00f5 8B5E0A   	  mov 0xa(%bp), %bx
+  62              	.LitoaLOOP1:
+  63 00f8 BA0000   	  mov $0, %dx
+  64 00fb F7F3     	  div %bx
+  65 00fd 89D6     	  mov %dx, %si
+  66 00ff 8A940000 	  movb ascii_table(%si), %dl
+  67 0103 8815     	  mov %dl, (%di)
+  68 0105 4F       	  dec %di
+  69 0106 83F800   	  cmp $0, %ax
+  70 0109 E0ED     	  loopnz .LitoaLOOP1
   71              	.LotpaLOOPEND1:
   72              	
   73              	
   74              	# 0 padding in the space
-  75 00ef 83F900   	  cmp $0, %cx
-  76 00f2 740D     	  je .Litoa6
-  77 00f4 B020     	  mov $0x20, %al
-  78 00f6 837E0C04 	  cmp $0b0100, 0xc(%bp)
-  79 00fa 7502     	  jne .Litoa7
-  80 00fc B030     	  mov $0x30, %al
+  75 010b 83F900   	  cmp $0, %cx
+  76 010e 740D     	  je .Litoa6
+  77 0110 B020     	  mov $0x20, %al
+  78 0112 837E0C04 	  cmp $0b0100, 0xc(%bp)
+  79 0116 7502     	  jne .Litoa7
+  80 0118 B030     	  mov $0x30, %al
   81              	.Litoa7:
-  82 00fe FD       	  std
-  83 00ff F3AA     	  rep stosb
+  82 011a FD       	  std
+  83 011b F3AA     	  rep stosb
   84              	.Litoa6:
   85              	
   86              	# return register
-  87 0101 5F       	  pop %di
-  88 0102 5E       	  pop %si
-  89 0103 5A       	  pop %dx
-  90 0104 59       	  pop %cx
-  91 0105 5B       	  pop %bx
-  92 0106 58       	  pop %ax
+  87 011d 5F       	  pop %di
+  88 011e 5E       	  pop %si
+  89 011f 5A       	  pop %dx
+  90 0120 59       	  pop %cx
+  91 0121 5B       	  pop %bx
+  92 0122 58       	  pop %ax
   93              	
   94              	# destroy stack frame
-  95 0107 89EC     	  mov %bp, %sp
-  96 0109 5D       	  pop %bp
-  97 010a C3       	  ret
+  95 0123 89EC     	  mov %bp, %sp
+  96 0125 5D       	  pop %bp
+  97 0126 C3       	  ret
   98              	
   99              	
  100              	
- 101 010b 30313233 	ascii_table: .string "0123456789ABCDEF"
+ 101 0127 30313233 	ascii_table: .string "0123456789ABCDEF"
  101      34353637 
  101      38394142 
  101      43444546 
  101      00
-  55              	.include "../modules/real/reboot.s"
+  69              	.include "../modules/real/reboot.s"
    1              	reboot:
-   2 011c 680000   		push $s_reboot_signal
-   3 011f E85AFF   		call puts
-   4 0122 83C402   		add $0x2, %sp
+   2 0138 680000   		push $s_reboot_signal
+   3 013b E85AFF   		call puts
+   4 013e 83C402   		add $0x2, %sp
    5              	
    6              	.Lreboot1:
-   7 0125 B410     		mov $0x10, %ah # wait input key
-   8 0127 CD16     		int $0x16 # bios call: input key
-   9              	
-  10 0129 3C20     		cmp $0x20, %al
-  11 012b 75F8     		jne .Lreboot1
-  12              	
-  13              		
-  14 012d 680000   		push $s_reboot_newline
-  15 0130 E849FF   		call puts
-  16 0133 83C402   		add $0x2, %sp
-  17              	
-  18 0136 CD19     		int $0x19 # bios call: reboot
-  19              	
-  20              	
-  21 0138 50757368 	s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
+   7 0141 B410     		mov $0x10, %ah # wait input key
 GAS LISTING boot.s 			page 5
 
 
+   8 0143 CD16     		int $0x16 # bios call: input key
+   9              	
+  10 0145 3C20     		cmp $0x20, %al
+  11 0147 75F8     		jne .Lreboot1
+  12              	
+  13              		
+  14 0149 680000   		push $s_reboot_newline
+  15 014c E849FF   		call puts
+  16 014f 83C402   		add $0x2, %sp
+  17              	
+  18 0152 CD19     		int $0x19 # bios call: reboot
+  19              	
+  20              	
+  21 0154 50757368 	s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
   21      20535041 
   21      4345206B 
   21      65792074 
   21      6F207265 
-  22 0156 0D0A0D0A 	s_reboot_newline: .string "\r\n\r\n"
+  22 0172 0D0A0D0A 	s_reboot_newline: .string "\r\n\r\n"
   22      00
   23              	
   24              	
-  56              	
-  57 015b 90       	.align 2
-  58              	 BOOT:
-  59              	
-  60              	
-  61              	.data
-  62 0000 BB       	  drive: .byte 0xBB
-  63 0001 007C     	  BOOT_LOAD: .word 0x7C00
-  64 0003 426F6F74 	  s0: .string "Booting..."
-  64      696E672E 
-  64      2E2E00
-  65 000e 2D2D2D2D 	  s1: .string "--------"
-  65      2D2D2D2D 
-  65      00
+  70              	
+  71 0177 426F6F74 	s0: .string "Booting...\r\n"
+  71      696E672E 
+  71      2E2E0D0A 
+  71      00
+  72 0184 2D2D2D2D 	s1: .string "--------\r\n"
+  72      2D2D2D2D 
+  72      0D0A00
+  73 018f 4572726F 	e0: .string "Error:sector read\r\n"
+  73      723A7365 
+  73      63746F72 
+  73      20726561 
+  73      640D0A00 
+  74 01a3 007C     	BOOT_LOAD: .word 0x7C00
+  75              	
+  76 01a5 90       	.align 2
+  77              	# BOOT:
+  78              	# drive: .byte 0xBB
+  79 01a6 0000     	boot_drive: .word 0x0000
+  80              	
+  81              	
+  82              	stage_2:
+  83 01a8 680000   	  push $s2
+  84 01ab E8EAFE   	  call puts
+  85 01ae 83C402   	  add $0x2, %sp
+  86 01b1 EBFE     	  jmp .
+  87              	
+  88 01b3 326E6420 	s2: .string "2nd stage...\r\n"
+  88      73746167 
+  88      652E2E2E 
+  88      0D0A00
+  89              	 
 GAS LISTING boot.s 			page 6
 
 
 DEFINED SYMBOLS
               boot.s:7      .text:0000000000000000 _start
               boot.s:15     .text:0000000000000058 ipl
-              boot.s:63     .data:0000000000000001 BOOT_LOAD
-              boot.s:62     .data:0000000000000000 drive
-              boot.s:64     .data:0000000000000003 s0
-../modules/real/puts.s:3      .text:000000000000007c puts
-../modules/real/reboot.s:1      .text:000000000000011c reboot
-../modules/real/puts.s:25     .text:000000000000008b .loop1
-../modules/real/itoa.s:13     .text:000000000000009b itoa
-../modules/real/itoa.s:101    .text:000000000000010b ascii_table
-../modules/real/reboot.s:21     .text:0000000000000138 s_reboot_signal
-../modules/real/reboot.s:22     .text:0000000000000156 s_reboot_newline
-              boot.s:58     .text:000000000000015c BOOT
-              boot.s:65     .data:000000000000000e s1
+              boot.s:74     .text:00000000000001a3 BOOT_LOAD
+              boot.s:79     .text:00000000000001a6 boot_drive
+              boot.s:71     .text:0000000000000177 s0
+../modules/real/puts.s:3      .text:0000000000000098 puts
+              boot.s:73     .text:000000000000018f e0
+../modules/real/reboot.s:1      .text:0000000000000138 reboot
+              boot.s:82     .text:00000000000001a8 stage_2
+../modules/real/puts.s:25     .text:00000000000000a7 .loop1
+../modules/real/itoa.s:13     .text:00000000000000b7 itoa
+../modules/real/itoa.s:101    .text:0000000000000127 ascii_table
+../modules/real/reboot.s:21     .text:0000000000000154 s_reboot_signal
+../modules/real/reboot.s:22     .text:0000000000000172 s_reboot_newline
+              boot.s:72     .text:0000000000000184 s1
+              boot.s:88     .text:00000000000001b3 s2
 
 NO UNDEFINED SYMBOLS
