@@ -9,30 +9,32 @@ _start:
 
   # BPB
   
-  .org 90 - (. - _start), 0x90
+  #.org 90 - (. - _start), 0x90
 
   # IPL
  ipl:
+  /*
   cli
   mov $0x0000, %ax
-  mov %ax, %dx
+  mov %ax, %ds
   mov %ax, %es
   mov %ax, %ss
-  mov (BOOT_LOAD), %sp
+  # mov (BOOT_LOAD), %sp
+  mov $0x7C00, %sp
   sti
   mov %dl, (boot_drive)
-  
+  */
 
   # push $0x41
   # call putc
   # add $2, %sp
   
-  
+  /*
   push $s0
   call puts
   add $2, %sp
-
-/*
+  */
+  /*
   push $0b0000
   push $10
   push $8
@@ -42,41 +44,41 @@ _start:
 
   push $s1
   call puts  
-*/
+  */
   
 # read 512 bytes : read sector
   mov $0x02, %ah # instruct read
   mov $0x1, %al # number of reading sector
   mov $0x0002, %cx # cylinder/sector
   mov $0x00, %dh # head position
-  mov $0x80, %dl
   # mov (boot_drive), %dl # drive number
-  mov $0x7F00, %bx # offset
+  mov $0x80, %dl
+  mov $0x7E00, %bx # offset
   int $0x13 # bios call : read sector
   jnc .Lboot1
   push $e0
   call puts
   add $0x2, %sp
   call reboot
-  add $2, %sp
 .Lboot1:
   jmp stage_2
 
 
-#.include "../modules/real/putc.s"
-.include "../modules/real/puts.s"
-.include "../modules/real/itoa.s"
-.include "../modules/real/reboot.s"
 
 s0: .string "Booting...\r\n"
-s1: .string "--------\r\n"
-e0: .string "Error:sector read\r\n"
+;s1: .string "--------\r\n"
+e0: .string "Error:sector read"
 BOOT_LOAD: .word 0x7C00
 
-.align 2
+#.align 2
 # BOOT:
 # drive: .byte 0xBB
-boot_drive: .word 0x0000
+#boot_drive: .word 0x0000
+
+#.include "../modules/real/putc.s"
+.include "../modules/real/puts.s"
+#.include "../modules/real/itoa.s"
+.include "../modules/real/reboot.s"
 
 
 stage_2:
@@ -86,4 +88,4 @@ stage_2:
   jmp .
 
 s2: .string "2nd stage...\r\n"
- 
+
