@@ -1,0 +1,42 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BOOT	src/00_boot_only/nasm_boot.s	/^BOOT:$/;"	l
+BOOT	src/00_boot_only/test.s	/^BOOT:											; ブートドライブに関する情報$/;"	l
+BOOT_LOAD	src/00_boot_only/boot.s	/^BOOT_LOAD: .word 0x7C00$/;"	l
+BOOT_LOAD	src/00_boot_only/nasm_boot.s	/^BOOT_LOAD equ 0x7C00$/;"	d
+BOOT_LOAD	src/00_boot_only/test.s	/^		BOOT_LOAD	equ		0x7C00				; ブートプログラムのロード位置$/;"	d
+BOOT_LOAD	src/boot/boot.s	/^BOOT_LOAD: .word 0x7C00$/;"	l
+ORG	src/00_boot_only/nasm_boot.s	/^ORG BOOT_LOAD$/;"	l
+_start	src/00_boot_only/boot.s	/^_start:$/;"	l
+_start	src/boot/boot.s	/^_start:$/;"	l
+ascii_table	src/modules/real/itoa.s	/^ascii_table: .string "0123456789ABCDEF"$/;"	l
+e0	src/00_boot_only/boot.s	/^e0: .string "Error:sector read"$/;"	l
+e0	src/boot/boot.s	/^e0: .string "Error:sector read"$/;"	l
+entry	src/00_boot_only/nasm_boot.s	/^entry:$/;"	l
+entry	src/00_boot_only/test.s	/^entry:$/;"	l
+ipl	src/00_boot_only/boot.s	/^ ipl:$/;"	l
+ipl	src/00_boot_only/nasm_boot.s	/^ipl:$/;"	l
+ipl	src/00_boot_only/test.s	/^ipl:$/;"	l
+ipl	src/boot/boot.s	/^ ipl:$/;"	l
+itoa	src/modules/real/itoa.s	/^itoa:$/;"	l
+main	src/00_boot_only/test.c	/^int main(){$/;"	f
+memcmp	src/modules/real/memcmp.s	/^memcmp:$/;"	l
+memcpy	src/modules/protect/memcpy.s	/^memcpy:$/;"	l
+memcpy	src/modules/real/memcpy.s	/^memcpy:$/;"	l
+putc	src/modules/real/nasm_putc.s	/^putc:$/;"	l
+putc	src/modules/real/putc.s	/^putc:$/;"	l
+puts	src/modules/real/puts.s	/^puts:$/;"	l
+reboot	src/modules/real/reboot.s	/^reboot:$/;"	l
+s0	src/00_boot_only/boot.s	/^s0: .string "Booting...\\r\\n"$/;"	l
+s0	src/boot/boot.s	/^s0: .string "Booting...\\r\\n"$/;"	l
+s2	src/00_boot_only/boot.s	/^s2: .string "2nd stage...\\r\\n"$/;"	l
+s2	src/boot/boot.s	/^s2: .string "2nd stage...\\r\\n"$/;"	l
+s_reboot_newline	src/modules/real/reboot.s	/^s_reboot_newline: .string "\\r\\n\\r\\n"$/;"	l
+s_reboot_signal	src/modules/real/reboot.s	/^s_reboot_signal: .string "Push SPACE key to reboot...\\r\\n"$/;"	l
+stage_2	src/00_boot_only/boot.s	/^stage_2:$/;"	l
+stage_2	src/00_boot_only/test.s	/^stage_2:$/;"	l
+stage_2	src/boot/boot.s	/^stage_2:$/;"	l

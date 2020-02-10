@@ -1,0 +1,3 @@
+.set BOOT_LOAD, 0x7C00
+.set BOOT_SIGNATURE, 0xAA55
+

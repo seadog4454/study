@@ -17,7 +17,6 @@ reboot:
 
 	int $0x19 # bios call: reboot
 
-
 s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
 s_reboot_newline: .string "\r\n\r\n"
 
