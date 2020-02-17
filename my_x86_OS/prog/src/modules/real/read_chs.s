@@ -11,6 +11,8 @@
  *		dst: 
  */
 
+.code16
+.section .text
 
 read_chs:
 	push %bp
@@ -68,11 +70,17 @@ read_chs:
 
   ret
 
+.section .data
 drive:
-drive.size.start:
-drive.no: .struct 2
-drive.cyln: .struct drive.no + 2
-drive.head: .struct drive.cyln + 2
-drive.sect: .struct drive.head + 2
-drive.size.end:
-drive.size: drive.size.end - drive.size.start
+	.struct 0
+drive.no: 
+	.struct drive.no + 2
+drive.cyln: 
+	.struct drive.cyln + 2
+drive.head: 
+	.struct drive.head + 2
+drive.sect: 
+	.struct drive.sect + 2
+drive.end:
+
+drive.size: drive.size.end - drive

@@ -1,4 +1,20 @@
 .code16
+
+.section .bss
+	.space drive.size
+
+#.section .data
+#.Lboot_drive:
+#  .struct 0
+#.Lboot_drive.no:
+#  .struct .Lboot_drive.no + 2
+#.Lboot_drive.cyln:
+#  .struct .Lboot_drive.cyln + 2
+#.Lboot_drive.head:
+#  .struct .Lboot_drive.head + 2
+#.Lboot_drive.sect:
+
+
 .section .text
 .global _start
 
@@ -20,13 +36,20 @@ ipl:
   sti
   
   push %bx
-  mov $.Lboot_drive, %bx
-  mov %dl, .Lboot_drive.no(%bx)
+  mov $drive.size, %bx
+  mov %dl, drive.no(%bx)
   pop %bx
   push $.Lboot_s0
   call puts
   add $2, %sp
- 
+
+
+.include "../modules/real/putc.s"
+.include "../modules/real/puts.s"
+#.include "../modules/real/itoa.s"
+.include "../modules/real/reboot.s"
+.include "../modules/real/read_chs.s"
+
  /* 
   mov $.Lboot_BOOT_SECT, %bx
   mov (%bx), %bx
@@ -45,6 +68,9 @@ ipl:
 .Lboot_10E:
   jmp stage_2
 */
+
+.section .text
+
 .Lboot_s0: .string "Booting...\r\n"
 .Lboot_s1: .string "--------\r\n"
 .Lboot_e0: .string "Error:sector read"
@@ -52,22 +78,7 @@ ipl:
 .Lboot_BOOT_SIZE: .word (1024 * 8)
 .Lboot_SECT_SIZE: .word 512
 .Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
-/*
-.Lboot_drive:
-  .struct 0
-.Lboot_drive.no:
-  .struct .Lboot_drive.no + 2
-.Lboot_drive.cyln:
-  .struct .Lboot_drive.cyln + 2
-.Lboot_drive.head:
-  .struct .Lboot_drive.head + 2
-.Lboot_drive.sect:
-*/
-.include "../modules/real/putc.s"
-.include "../modules/real/puts.s"
-#.include "../modules/real/itoa.s"
-.include "../modules/real/reboot.s"
-#.include "../modules/real/read_chs.s"
+
 
 /* write boot signature in 0x200 */
 
