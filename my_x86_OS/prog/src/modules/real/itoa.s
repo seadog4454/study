@@ -1,4 +1,5 @@
 .code16
+.section .text
 
 # void itoa(num, buff, size, radix, flag)
 # num:source addr

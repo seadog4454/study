@@ -1,3 +1,6 @@
+.code16
+.section .text
+
 memcmp:
   push %bp
   mov %sp. %bp

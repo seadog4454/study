@@ -1,4 +1,5 @@
 .code16
+.section .text
 
 putc:
   push %bp

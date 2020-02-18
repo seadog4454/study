@@ -29,17 +29,17 @@ read_chs:
 
 	mov 0x4(%bp), %si # src buff
 	
-  mov drive.clyn(%si, 0x0), %ch
-  mov drive.clyn(%si, 0x1), %cl
+  mov drive.cyln(%si), %ch
+  mov drive.cyln(%si, 0x1), %cl
   shl $6, %cl
-  or drive.sect(%si), $cl
+  or drive.sect(%si), %cl
   
   mov drive.head(%si), %dh
   mov drive.no(%si), %dl
   mov %ax, %es
   mov 0x8(%bp), %bx # dist copy
 
-.read_chs1L
+.read_chs1L:
   mov $0x2, %ah
   mov 0x6(%bp), %al
 
@@ -48,15 +48,15 @@ read_chs:
 
   mov $0, %al
   jmp .read_chs2E
-.read_chs1E
+.read_chs1E:
   
   cmp $0, %al
   jne .read_chs2E
 
-  mvo $0, %ax
-  dec -0x2(%bp)
+  mov $0, %ax
+  decw -0x2(%bp)
   jnz .read_chs1L
-.read_chs2E
+.read_chs2E:
   mov $0, %ah
 
   pop %si
@@ -70,7 +70,11 @@ read_chs:
 
   ret
 
+
+
 .section .data
+
+.set drive.size, 6
 drive:
 	.struct 0
 drive.no: 
@@ -80,7 +84,4 @@ drive.cyln:
 drive.head: 
 	.struct drive.head + 2
 drive.sect: 
-	.struct drive.sect + 2
 drive.end:
-
-drive.size: drive.size.end - drive

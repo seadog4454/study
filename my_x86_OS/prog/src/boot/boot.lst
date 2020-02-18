@@ -3,103 +3,128 @@ GAS LISTING boot.s 			page 1
 
    1              	.code16
    2              	
-   3              	.section .bss
-   4 ???? 00000000 		.space drive.size
-   4      00000000 
-   5              	
-   6              	#.section .data
-   7              	#.Lboot_drive:
-   8              	#  .struct 0
-   9              	#.Lboot_drive.no:
-  10              	#  .struct .Lboot_drive.no + 2
-  11              	#.Lboot_drive.cyln:
-  12              	#  .struct .Lboot_drive.cyln + 2
-  13              	#.Lboot_drive.head:
-  14              	#  .struct .Lboot_drive.head + 2
-  15              	#.Lboot_drive.sect:
-  16              	
-  17              	
-  18              	.section .text
-  19              	.global _start
+   3              	
+   4              	
+   5              	.section .bss
+   6              	drive_tmp:
+   7 0000 00000000 		.space drive.size, 0
+   7      0000
+   8              	
+   9              	#.section .data
+  10              	#.Lboot_drive:
+  11              	#  .struct 0
+  12              	#.Lboot_drive.no:
+  13              	#  .struct .Lboot_drive.no + 2
+  14              	#.Lboot_drive.cyln:
+  15              	#  .struct .Lboot_drive.cyln + 2
+  16              	#.Lboot_drive.head:
+  17              	#  .struct .Lboot_drive.head + 2
+  18              	#.Lboot_drive.sect:
+  19              	
   20              	
-  21              	_start:
-  22 ???? EB58     	  jmp ipl
+  21              	.section .text
+  22              	.global _start
   23              	
-  24              	  # BPB(BIOS Prameter Block)  
-  25 ???? 00000000 	  .fill 90 - (. - _start), 0x1, 0x0
-  25      00000000 
-  25      00000000 
-  25      00000000 
-  25      00000000 
+  24              	_start:
+  25 0000 EB58     	  jmp ipl
   26              	
-  27              	  # IPL(Initial Program Loader)
-  28              	ipl:
-  29 ???? FA       	  cli
-  30 ???? B80000   	  mov $0x0000, %ax
-  31 ???? 8ED8     	  mov %ax, %ds
-  32 ???? 8EC0     	  mov %ax, %es
-  33 ???? 8ED0     	  mov %ax, %ss
-  34              	  
-  35 ???? 8B260000 	  mov (.Lboot_BOOT_LOAD), %sp
-  36 ???? FB       	  sti
+  27              	  # BPB(BIOS Prameter Block)  
+  28 0002 00000000 	  .fill 90 - (. - _start), 0x1, 0x0
+  28      00000000 
+  28      00000000 
+  28      00000000 
+  28      00000000 
+  29              	
+  30              	  # IPL(Initial Program Loader)
+  31              	ipl:
+  32 005a FA       	  cli
+  33 005b B80000   	  mov $0x0000, %ax
+  34 005e 8ED8     	  mov %ax, %ds
+  35 0060 8EC0     	  mov %ax, %es
+  36 0062 8ED0     	  mov %ax, %ss
   37              	  
-  38 ???? 53       	  push %bx
-  39 ???? BB0800   	  mov $drive.size, %bx
-  40 ???? 88970000 	  mov %dl, drive.no(%bx)
-  41 ???? 5B       	  pop %bx
-  42 ???? 680000   	  push $.Lboot_s0
-  43 ???? E81800   	  call puts
-  44 ???? 83C402   	  add $2, %sp
-  45              	
-  46              	
-  47              	.include "../modules/real/putc.s"
-   1              	.code16
-   2              	
-   3              	putc:
-   4 ???? 55       	  push %bp
-   5 ???? 89E5     	  mov %sp, %bp
+  38 0064 8B260000 	  mov (.Lboot_BOOT_LOAD), %sp
+  39 0068 FB       	  sti
+  40              	  
+  41 0069 BB0000   	  mov $drive_tmp, %bx
+  42 006c 88970000 	  mov %dl, drive.no(%bx)
+  43 0070 5B       	  pop %bx
+  44 0071 680000   	  push $.Lboot_s0
+  45 0074 E83F00   	  call puts
+  46 0077 83C402   	  add $2, %sp
+  47              	
+  48              	 
+  49 007a BB0000   	  mov $.Lboot_BOOT_SECT, %bx
+  50 007d 8B1F     	  mov (%bx), %bx
+  51 007f 2B1E0100 	  sub 0x1, %bx
+  52 0083 51       	  push %cx
 GAS LISTING boot.s 			page 2
 
 
-   6              	
-   7 ???? 50       	  push %ax
-   8 ???? 53       	  push %bx
-   9              	
-  10              	  
-  11              	  # mov $0x41, %al
-  12              	  # mov $0x0E, %ah
-  13              	  # mov $0x0000, %bx
-  14              	  # int $0x10
-  15              	
+  53 0084 53       	  push %bx
+  54 0085 680000   	  push $drive_tmp
+  55 0088 E88900   	  call read_chs
+  56 008b 83C406   	  add $6, %sp
+  57 008e 39D8     		cmp %bx, %ax
+  58 0090 740C     	  jz .Lboot_10E
+  59 0092 680000   	  push $.Lboot_e0
+  60 0095 E81E00   	  call puts
+  61 0098 83C402   	  add $2, %sp
+  62 009b E83700   	  call reboot
+  63              	.Lboot_10E:
+  64 009e E95F01   	  jmp stage_2
+  65              	
+  66              	
+  67              	
+  68              	.include "../modules/real/putc.s"
+   1              	.code16
+   2              	.section .text
+   3              	
+   4              	putc:
+   5 00a1 55       	  push %bp
+   6 00a2 89E5     	  mov %sp, %bp
+   7              	
+   8 00a4 50       	  push %ax
+   9 00a5 53       	  push %bx
+  10              	
+  11              	  
+  12              	  # mov $0x41, %al
+  13              	  # mov $0x0E, %ah
+  14              	  # mov $0x0000, %bx
+  15              	  # int $0x10
   16              	
-  17 ???? 8A4604   	  mov 0x4(%bp), %al
-  18 ???? B40E     	  mov $0x0E, %ah
-  19 ???? BB0000   	  mov $0x0000, %bx
-  20 ???? CD10     	  int $0x10
-  21              	
-  22 ???? 5B       	  pop %bx
-  23 ???? 58       	  pop %ax
-  24              	
-  25 ???? 89EC     	  mov %bp, %sp
-  26 ???? 5D       	  pop %bp
-  27              	
-  28 ???? C3       	  ret
-  48              	.include "../modules/real/puts.s"
+  17              	
+  18 00a6 8A4604   	  mov 0x4(%bp), %al
+  19 00a9 B40E     	  mov $0x0E, %ah
+  20 00ab BB0000   	  mov $0x0000, %bx
+  21 00ae CD10     	  int $0x10
+  22              	
+  23 00b0 5B       	  pop %bx
+  24 00b1 58       	  pop %ax
+  25              	
+  26 00b2 89EC     	  mov %bp, %sp
+  27 00b4 5D       	  pop %bp
+  28              	
+  29 00b5 C3       	  ret
+  69              	.include "../modules/real/puts.s"
    1              	.code16
    2              	
    3              	puts:
-   4 ???? 55       	  push %bp
-   5 ???? 89E5     	  mov %sp, %bp
+   4 00b6 55       	  push %bp
+   5 00b7 89E5     	  mov %sp, %bp
    6              	
-   7 ???? 50       	  push %ax
-   8 ???? 53       	  push %bx
-   9 ???? 56       	  push %si #arg1: pointer of strings
+   7 00b9 50       	  push %ax
+   8 00ba 53       	  push %bx
+   9 00bb 56       	  push %si #arg1: pointer of strings
   10              	
-  11 ???? 8B7604   	  mov 0x4(%bp), %si
+  11 00bc 8B7604   	  mov 0x4(%bp), %si
+GAS LISTING boot.s 			page 3
+
+
   12              	
-  13 ???? B40E     	  mov $0x0E, %ah # output one char
-  14 ???? BB0000   	  mov $0x0000, %bx
-  15 ???? FC       	  cld # DF = 0
+  13 00bf B40E     	  mov $0x0E, %ah # output one char
+  14 00c1 BB0000   	  mov $0x0000, %bx
+  15 00c4 FC       	  cld # DF = 0
   16              	
   17              	  
   18              	/*
@@ -110,58 +135,61 @@ GAS LISTING boot.s 			page 1
   23              	
   24              	
   25              	.loop1:
-  26 ???? AC       	  lodsb # AL = *SI++
-  27 ???? 3C00     	  cmp $0, %al
-  28 ???? 7404     	  je .L1
+  26 00c5 AC       	  lodsb # AL = *SI++
+  27 00c6 3C00     	  cmp $0, %al
+  28 00c8 7404     	  je .L1
   29              	  
-  30 ???? CD10     	  int $0x10
-  31 ???? EBF7     	  jmp .loop1
+  30 00ca CD10     	  int $0x10
+  31 00cc EBF7     	  jmp .loop1
   32              	
   33              	.L1:
-GAS LISTING boot.s 			page 3
-
-
   34              	
-  35 ???? 5E       	  pop %si
-  36 ???? 5B       	  pop %bx
-  37 ???? 58       	  pop %ax
+  35 00ce 5E       	  pop %si
+  36 00cf 5B       	  pop %bx
+  37 00d0 58       	  pop %ax
   38              	
-  39 ???? 89EC     	  mov %bp, %sp
-  40 ???? 5D       	  pop %bp
+  39 00d1 89EC     	  mov %bp, %sp
+  40 00d3 5D       	  pop %bp
   41              	
-  42 ???? C3       	  ret
+  42 00d4 C3       	  ret
   43              	 
-  49              	#.include "../modules/real/itoa.s"
-  50              	.include "../modules/real/reboot.s"
-   1              	reboot:
-   2 ???? 680000   		push $s_reboot_signal
-   3 ???? E8DBFF   		call puts
-   4 ???? 83C402   		add $0x2, %sp
-   5              	
-   6              	.Lreboot1:
-   7 ???? B410     		mov $0x10, %ah # wait input key
-   8 ???? CD16     		int $0x16 # bios call: input key
-   9              	
-  10 ???? 3C20     		cmp $0x20, %al
-  11 ???? 75F8     		jne .Lreboot1
+  70              	#.include "../modules/real/itoa.s"
+  71              	.include "../modules/real/reboot.s"
+   1              	.code16
+   2              	.section .text
+   3              	
+   4              	reboot:
+   5 00d5 680000   		push $s_reboot_signal
+   6 00d8 E8DBFF   		call puts
+   7 00db 83C402   		add $0x2, %sp
+   8              	
+   9              	.Lreboot1:
+  10 00de B410     		mov $0x10, %ah # wait input key
+  11 00e0 CD16     		int $0x16 # bios call: input key
   12              	
-  13              		
-  14 ???? 680000   		push $s_reboot_newline
-  15 ???? E8CAFF   		call puts
-  16 ???? 83C402   		add $0x2, %sp
-  17              	
-  18 ???? CD19     		int $0x19 # bios call: reboot
-  19              	
-  20 ???? 50757368 	s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
-  20      20535041 
-  20      4345206B 
-  20      65792074 
-  20      6F207265 
-  21 ???? 0D0A0D0A 	s_reboot_newline: .string "\r\n\r\n"
-  21      00
+  13 00e2 3C20     		cmp $0x20, %al
+  14 00e4 75F8     		jne .Lreboot1
+  15              	
+  16              		
+  17 00e6 680000   		push $s_reboot_newline
+  18 00e9 E8CAFF   		call puts
+  19 00ec 83C402   		add $0x2, %sp
+  20              	
+  21 00ef CD19     		int $0x19 # bios call: reboot
   22              	
-  23              	
-  51              	.include "../modules/real/read_chs.s"
+  23 00f1 50757368 	s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
+GAS LISTING boot.s 			page 4
+
+
+  23      20535041 
+  23      4345206B 
+  23      65792074 
+  23      6F207265 
+  24 010f 0D0A0D0A 	s_reboot_newline: .string "\r\n\r\n"
+  24      00
+  25              	
+  26              	
+  72              	.include "../modules/real/read_chs.s"
    1              	/*
    2              	 * read_chs(drive, sect, dst)
    3              	 * return: number of read sectors: ax register
@@ -178,160 +206,141 @@ GAS LISTING boot.s 			page 1
   14              	.code16
   15              	.section .text
   16              	
-GAS LISTING boot.s 			page 4
-
-
   17              	read_chs:
-  18 ???? 55       		push %bp
-  19 ???? 89E5     		mov %sp, %bp
+  18 0114 55       		push %bp
+  19 0115 89E5     		mov %sp, %bp
   20              	
-  21 ???? 6A03     		push $3  # number of retries
-  22 ???? FF360000 		push 0 # number of read sector
+  21 0117 6A03     		push $3  # number of retries
+  22 0119 FF360000 		push 0 # number of read sector
   23              	
-  24 ???? 55       		push %bp
-  25 ???? 51       		push %cx
-  26 ???? 52       		push %dx
-  27 ???? 06       		push %es
-  28 ???? 56       		push %si
+  24 011d 55       		push %bp
+  25 011e 51       		push %cx
+  26 011f 52       		push %dx
+  27 0120 06       		push %es
+  28 0121 56       		push %si
   29              	
-  30 ???? 8B7604   		mov 0x4(%bp), %si # src buff
+  30 0122 8B7604   		mov 0x4(%bp), %si # src buff
   31              		
-  32              	  mov drive.clyn(%si, 0x0), %ch
-  33 ???? 8A8C0000 	  mov drive.clyn(%si, 0x1), %cl
-  34 ???? C0E106   	  shl $6, %cl
-  35              	  or drive.sect(%si), $cl
+  32 0125 8AAC0200 	  mov drive.cyln(%si), %ch
+  33 0129 8A8C0200 	  mov drive.cyln(%si, 0x1), %cl
+  34 012d C0E106   	  shl $6, %cl
+  35 0130 0A8C0600 	  or drive.sect(%si), %cl
   36              	  
-  37 ???? 8AB40400 	  mov drive.head(%si), %dh
-  38 ???? 8A940000 	  mov drive.no(%si), %dl
-  39 ???? 8EC0     	  mov %ax, %es
-  40 ???? 8B5E08   	  mov 0x8(%bp), %bx # dist copy
+  37 0134 8AB40400 	  mov drive.head(%si), %dh
+  38 0138 8A940000 	  mov drive.no(%si), %dl
+  39 013c 8EC0     	  mov %ax, %es
+  40 013e 8B5E08   	  mov 0x8(%bp), %bx # dist copy
   41              	
-  42              	.read_chs1L
-  43 ???? B402     	  mov $0x2, %ah
-  44 ???? 8A4606   	  mov 0x6(%bp), %al
+  42              	.read_chs1L:
+  43 0141 B402     	  mov $0x2, %ah
+  44 0143 8A4606   	  mov 0x6(%bp), %al
   45              	
-  46 ???? CD13     	  int $0x13
-  47 ???? 0F830000 	  jnc .read_chs1E
+  46 0146 CD13     	  int $0x13
+  47 0148 7304     	  jnc .read_chs1E
   48              	
-  49 ???? B000     	  mov $0, %al
-  50 ???? E90000   	  jmp .read_chs2E
-  51              	.read_chs1E
-  52              	  
-  53 ???? 3C00     	  cmp $0, %al
-  54 ???? 0F850000 	  jne .read_chs2E
-  55              	
-  56              	  mvo $0, %ax
-  57              	  dec -0x2(%bp)
-  58 ???? 0F850000 	  jnz .read_chs1L
-  59              	.read_chs2E
-  60 ???? B400     	  mov $0, %ah
-  61              	
-  62 ???? 5E       	  pop %si
-  63 ???? 07       	  pop %es
-  64 ???? 5A       	  pop %dx
-  65 ???? 59       	  pop %cx
-  66 ???? 5B       	  pop %bx
-  67              	
-  68 ???? 89EC     	  mov %bp, %sp
-  69 ???? 5D       	  pop %bp
-  70              	
-  71 ???? C3       	  ret
-  72              	
-  73              	.section .data
 GAS LISTING boot.s 			page 5
 
 
-  74              	drive:
-  75              		.struct 0
-  52              	
-  53              	 /* 
-  54              	  mov $.Lboot_BOOT_SECT, %bx
-  55              	  mov (%bx), %bx
-  56              	  sub 0x1, %bx
-  57              	  mov %bx, bx
-  58              	  #push %cx
-  59              	  #push %bx
-  60              	  #push $.Lboot_drive
-  61              	  #call read_chs
-  62              	  cmp %bx, %ax
-  63              	  jz .Lboot_10E
-  64              	  push $.Lboot_e0
-  65              	  call puts
-  66              	  add $2, %sp
-  67              	  call reboot
-  68              	.Lboot_10E:
-  69              	  jmp stage_2
-  70              	*/
-  71              	
-  72              	.section .text
+  49 014a B000     	  mov $0, %al
+  50 014c EB0C     	  jmp .read_chs2E
+  51              	.read_chs1E:
+  52              	  
+  53 014e 3C00     	  cmp $0, %al
+  54 0150 7508     	  jne .read_chs2E
+  55              	
+  56 0152 B80000   	  mov $0, %ax
+  57 0155 FF4EFE   	  decw -0x2(%bp)
+  58 0158 75E7     	  jnz .read_chs1L
+  59              	.read_chs2E:
+  60 015a B400     	  mov $0, %ah
+  61              	
+  62 015c 5E       	  pop %si
+  63 015d 07       	  pop %es
+  64 015e 5A       	  pop %dx
+  65 015f 59       	  pop %cx
+  66 0160 5B       	  pop %bx
+  67              	
+  68 0161 89EC     	  mov %bp, %sp
+  69 0163 5D       	  pop %bp
+  70              	
+  71 0164 C3       	  ret
+  72              	
   73              	
-  74 ???? 426F6F74 	.Lboot_s0: .string "Booting...\r\n"
-  74      696E672E 
-  74      2E2E0D0A 
-  74      00
-  75 ???? 2D2D2D2D 	.Lboot_s1: .string "--------\r\n"
-  75      2D2D2D2D 
-  75      0D0A00
-  76 ???? 4572726F 	.Lboot_e0: .string "Error:sector read"
-  76      723A7365 
-  76      63746F72 
-  76      20726561 
-  76      6400
-  77 ???? 007C     	.Lboot_BOOT_LOAD: .word 0x7C00
-  78 ???? 0020     	.Lboot_BOOT_SIZE: .word (1024 * 8)
-  79 ???? 0002     	.Lboot_SECT_SIZE: .word 512
-  80 ???? 1000     	.Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
-  81              	
-  82              	
-  83              	/* write boot signature in 0x200 */
+  74              	
+  75              	.section .data
+  76              	
+  77              	.set drive.size, 6
+  78              	drive:
+  79              		.struct 0
+  73              	
+  74              	.section .text
+  75              	
+  76 0165 426F6F74 	.Lboot_s0: .string "Booting...\r\n"
+  76      696E672E 
+  76      2E2E0D0A 
+  76      00
+  77 0172 2D2D2D2D 	.Lboot_s1: .string "--------\r\n"
+  77      2D2D2D2D 
+  77      0D0A00
+  78 017d 4572726F 	.Lboot_e0: .string "Error:sector read"
+  78      723A7365 
+  78      63746F72 
+  78      20726561 
+  78      6400
+  79 018f 007C     	.Lboot_BOOT_LOAD: .word 0x7C00
+  80 0191 0020     	.Lboot_BOOT_SIZE: .word (1024 * 8)
+  81 0193 0002     	.Lboot_SECT_SIZE: .word 512
+  82 0195 1000     	.Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
+  83              	
   84              	
-  85 ???? 00000000 	.Lboot_boot_sig: .fill 0x1fe - (. - _start), 0x1, 0x0
-  85      00000000 
-  85      00000000 
-  85      00000000 
-  85      00000000 
-  86 ???? 55AA     	.Lboot_BOOT_SIGNATURE: .word 0xAA55
-  87              	
-  88              	stage_2:
-  89 ???? 680000   	  push $.Lboot_s2
-  90 ???? E88AFE   	  call puts
-  91 ???? 83C402   	  add $0x2, %sp
-  92 ???? EBFE     	  jmp .
-  93              	
+  85              	/* write boot signature in 0x200 */
+  86              	
+  87 0197 00000000 	.Lboot_boot_sig: .fill 0x1fe - (. - _start), 0x1, 0x0
+  87      00000000 
+  87      00000000 
 GAS LISTING boot.s 			page 6
 
 
-  94 ???? 326E6420 	.Lboot_s2: .string "2nd stage...\r\n"
-  94      73746167 
-  94      652E2E2E 
-  94      0D0A00
+  87      00000000 
+  87      00000000 
+  88 01fe 55AA     	.Lboot_BOOT_SIGNATURE: .word 0xAA55
+  89              	
+  90              	stage_2:
+  91 0200 680000   	  push $.Lboot_s2
+  92 0203 E8B0FE   	  call puts
+  93 0206 83C402   	  add $0x2, %sp
+  94 0209 EBFE     	  jmp .
   95              	
-  96              	
+  96 020b 326E6420 	.Lboot_s2: .string "2nd stage...\r\n"
+  96      73746167 
+  96      652E2E2E 
+  96      0D0A00
+  97              	
+  98              	
 GAS LISTING boot.s 			page 7
 
 
 DEFINED SYMBOLS
-                            *ABS*:0000000000000008 drive.size
-              boot.s:21     .text:0000000000000000 _start
-              boot.s:28     .text:000000000000005a ipl
+              boot.s:6      .bss:0000000000000000 drive_tmp
+                            *ABS*:0000000000000006 drive.size
+              boot.s:24     .text:0000000000000000 _start
+              boot.s:31     .text:000000000000005a ipl
                             *ABS*:0000000000000000 drive.no
-../modules/real/puts.s:3      .text:0000000000000090 puts
-../modules/real/putc.s:3      .text:000000000000007b putc
-../modules/real/puts.s:25     .text:000000000000009f .loop1
-../modules/real/reboot.s:1      .text:00000000000000af reboot
-../modules/real/reboot.s:20     .text:00000000000000cb s_reboot_signal
-../modules/real/reboot.s:21     .text:00000000000000e9 s_reboot_newline
-../modules/real/read_chs.s:17     .text:00000000000000ee read_chs
+../modules/real/puts.s:3      .text:00000000000000b6 puts
+../modules/real/read_chs.s:17     .text:0000000000000114 read_chs
+../modules/real/reboot.s:4      .text:00000000000000d5 reboot
+              boot.s:90     .text:0000000000000200 stage_2
+../modules/real/putc.s:4      .text:00000000000000a1 putc
+../modules/real/puts.s:25     .text:00000000000000c5 .loop1
+../modules/real/reboot.s:23     .text:00000000000000f1 s_reboot_signal
+../modules/real/reboot.s:24     .text:000000000000010f s_reboot_newline
+                            *ABS*:0000000000000002 drive.cyln
                             *ABS*:0000000000000006 drive.sect
                             *ABS*:0000000000000004 drive.head
-../modules/real/read_chs.s:74     .data:0000000000000000 drive
-                            *ABS*:0000000000000002 drive.cyln
-                            *ABS*:0000000000000008 drive.end
-              boot.s:88     .text:0000000000000200 stage_2
+../modules/real/read_chs.s:42     .text:0000000000000141 .read_chs1L
+../modules/real/read_chs.s:51     .text:000000000000014e .read_chs1E
+../modules/real/read_chs.s:59     .text:000000000000015a .read_chs2E
+../modules/real/read_chs.s:78     .data:0000000000000000 drive
+                            *ABS*:0000000000000006 drive.end
 
-UNDEFINED SYMBOLS
-drive.clyn
-cl
-.read_chs1E
-.read_chs2E
-.read_chs1L
+NO UNDEFINED SYMBOLS

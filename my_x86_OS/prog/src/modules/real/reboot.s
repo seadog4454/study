@@ -1,3 +1,6 @@
+.code16
+.section .text
+
 reboot:
 	push $s_reboot_signal
 	call puts

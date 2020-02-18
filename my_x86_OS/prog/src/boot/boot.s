@@ -1,7 +1,10 @@
 .code16
 
+
+
 .section .bss
-	.space drive.size
+drive_tmp:
+	.space drive.size, 0
 
 #.section .data
 #.Lboot_drive:
@@ -35,31 +38,23 @@ ipl:
   mov (.Lboot_BOOT_LOAD), %sp
   sti
   
-  push %bx
-  mov $drive.size, %bx
+  mov $drive_tmp, %bx
   mov %dl, drive.no(%bx)
   pop %bx
   push $.Lboot_s0
   call puts
   add $2, %sp
 
-
-.include "../modules/real/putc.s"
-.include "../modules/real/puts.s"
-#.include "../modules/real/itoa.s"
-.include "../modules/real/reboot.s"
-.include "../modules/real/read_chs.s"
-
- /* 
+ 
   mov $.Lboot_BOOT_SECT, %bx
   mov (%bx), %bx
   sub 0x1, %bx
-  mov %bx, bx
-  #push %cx
-  #push %bx
-  #push $.Lboot_drive
-  #call read_chs
-  cmp %bx, %ax
+  push %cx
+  push %bx
+  push $drive_tmp
+  call read_chs
+  add $6, %sp
+	cmp %bx, %ax
   jz .Lboot_10E
   push $.Lboot_e0
   call puts
@@ -67,7 +62,14 @@ ipl:
   call reboot
 .Lboot_10E:
   jmp stage_2
-*/
+
+
+
+.include "../modules/real/putc.s"
+.include "../modules/real/puts.s"
+#.include "../modules/real/itoa.s"
+.include "../modules/real/reboot.s"
+.include "../modules/real/read_chs.s"
 
 .section .text
 
