@@ -2,9 +2,9 @@
 
 
 
-.section .bss
-drive_tmp:
-	.space drive.size, 0
+#.section .bss
+#drive_tmp:
+#	.space drive.size, 0
 
 #.section .data
 #.Lboot_drive:
@@ -37,22 +37,31 @@ ipl:
   
   mov (.Lboot_BOOT_LOAD), %sp
   sti
-  
-  mov $drive_tmp, %bx
+ 
+  mov $drive_tmp, %bx 
   mov %dl, drive.no(%bx)
-  pop %bx
   push $.Lboot_s0
   call puts
   add $2, %sp
 
- 
-  mov $.Lboot_BOOT_SECT, %bx
-  mov (%bx), %bx
-  sub 0x1, %bx
-  push %cx
+	mov (.Lboot_BOOT_LOAD), %ax
+	mov (.Lboot_SECT_SIZE), %cx
+  mov (.Lboot_BOOT_SECT), %bx
+  sub $0x1, %bx
+	add %ax, %cx
+
+	push %bx
+	mov $drive_tmp, %bx
+	movw $0x0, drive.no(%bx)
+	movw $0x0, drive.cyln(%bx)
+	movw $0x0, drive.head(%bx)
+	movw $0x2, drive.sect(%bx)
+	pop %bx
+
+	push %cx
   push %bx
   push $drive_tmp
-  call read_chs
+	call read_chs
   add $6, %sp
 	cmp %bx, %ax
   jz .Lboot_10E
@@ -73,6 +82,8 @@ ipl:
 
 .section .text
 
+
+drive_tmp: .space 0x8
 .Lboot_s0: .string "Booting...\r\n"
 .Lboot_s1: .string "--------\r\n"
 .Lboot_e0: .string "Error:sector read"

@@ -19,7 +19,7 @@ read_chs:
 	mov %sp, %bp
 
 	push $3  # number of retries
-	push 0 # number of read sector
+	push $0 # number of read sector
 
 	push %bp
 	push %cx
@@ -30,7 +30,10 @@ read_chs:
 	mov 0x4(%bp), %si # src buff
 	
   mov drive.cyln(%si), %ch
-  mov drive.cyln(%si, 0x1), %cl
+	push %si
+  add $1, %si
+	mov drive.cyln(%si), %cl
+	pop %si
   shl $6, %cl
   or drive.sect(%si), %cl
   
