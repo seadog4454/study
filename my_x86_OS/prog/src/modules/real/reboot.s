@@ -1,5 +1,4 @@
 .code16
-.section .text
 
 reboot:
 	push $s_reboot_signal
@@ -20,7 +19,7 @@ reboot:
 
 	int $0x19 # bios call: reboot
 
-s_reboot_signal: .string "Push SPACE key to reboot...\r\n"
-s_reboot_newline: .string "\r\n\r\n"
+s_reboot_signal: .string "\n\rPush SPACE key to reboot..."
+s_reboot_newline: .string "\n\r\n\r"
 
 

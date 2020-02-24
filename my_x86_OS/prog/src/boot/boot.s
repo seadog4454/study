@@ -25,7 +25,7 @@ _start:
   jmp ipl
 
   # BPB(BIOS Prameter Block)  
-  .fill 90 - (. - _start), 0x1, 0x0
+  .fill 90 - (. - _start), 0x1, 0x90
 
   # IPL(Initial Program Loader)
 ipl:
@@ -35,28 +35,42 @@ ipl:
   mov %ax, %es
   mov %ax, %ss
   
-  mov (.Lboot_BOOT_LOAD), %sp
+  #本通りに書いてみる
+  #mov (.Lboot_BOOT_LOAD), %sp
+  mov $0x7C00, %sp
   sti
  
-  mov $drive_tmp, %bx 
-  mov %dl, drive.no(%bx)
+  #mov $drive_tmp, %bx 
+  #mov %dl, drive.no(%bx)
+  #mov %dl, (%bx)
+  mov %dl, (drive_tmp)
   push $.Lboot_s0
   call puts
   add $2, %sp
 
-	mov (.Lboot_BOOT_LOAD), %ax
-	mov (.Lboot_SECT_SIZE), %cx
-  mov (.Lboot_BOOT_SECT), %bx
-  sub $0x1, %bx
-	add %ax, %cx
 
-	push %bx
-	mov $drive_tmp, %bx
-	movw $0x0, drive.no(%bx)
-	movw $0x0, drive.cyln(%bx)
-	movw $0x0, drive.head(%bx)
-	movw $0x2, drive.sect(%bx)
-	pop %bx
+
+  #本通りに書いてみる
+	#mov (.Lboot_BOOT_LOAD), %ax
+	#mov (.Lboot_SECT_SIZE), %cx
+  #mov (.Lboot_BOOT_SECT), %bx
+  #sub $0x1, %bx
+	#add %ax, %cx
+
+	#push %bx
+	#mov $drive_tmp, %bx
+	#movw $0x0, (%bx)
+	#movw $0x0, 0x2(%bx)
+	#movw $0x0, 0x4(%bx)
+	#movw $0x2, 0x6(%bx)
+  #movw $0x0, drive.no(%bx)
+	#movw $0x0, drive.cyln(%bx)
+	#movw $0x0, drive.head(%bx)
+	#movw $0x2, drive.sect(%bx)
+	#pop %bx
+
+  mov $15, %bx
+  mov $0x7E00, %cx
 
 	push %cx
   push %bx
@@ -74,23 +88,31 @@ ipl:
 
 
 
-.include "../modules/real/putc.s"
+
+#.section .text
+
+.Lboot_s0: .string "Booting...\n\r"
+#.Lboot_s1: .string "--------\r\n"
+.Lboot_e0: .string "Error:sector read"
+#.Lboot_BOOT_LOAD: .word 0x7C00
+#.Lboot_BOOT_SIZE: .word (1024 * 8)
+#.Lboot_SECT_SIZE: .word 512
+#.Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
+
+
+.align 2
+#drive_tmp: .space 0x8
+drive_tmp: .word 0x0
+drive_tmp1: .word 0x0
+drive_tmp2: .word 0x0
+drive_tmp3: .word 0x2
+
+
+#.include "../modules/real/putc.s"
 .include "../modules/real/puts.s"
 #.include "../modules/real/itoa.s"
 .include "../modules/real/reboot.s"
 .include "../modules/real/read_chs.s"
-
-.section .text
-
-
-drive_tmp: .space 0x8
-.Lboot_s0: .string "Booting...\r\n"
-.Lboot_s1: .string "--------\r\n"
-.Lboot_e0: .string "Error:sector read"
-.Lboot_BOOT_LOAD: .word 0x7C00
-.Lboot_BOOT_SIZE: .word (1024 * 8)
-.Lboot_SECT_SIZE: .word 512
-.Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
 
 
 /* write boot signature in 0x200 */
@@ -106,4 +128,4 @@ stage_2:
 
 .Lboot_s2: .string "2nd stage...\r\n"
 
-
+.fill 0x2000 - (. - _start), 0x1, 0x0

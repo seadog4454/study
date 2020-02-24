@@ -12,6 +12,7 @@
  */
 
 .code16
+.section .text
 
 read_chs:
 	push %bp
@@ -20,7 +21,7 @@ read_chs:
 	push $3  # number of retries
 	push $0 # number of read sector
 
-	push %bx
+	push %bp
 	push %cx
 	push %dx
 	push %es
@@ -30,19 +31,16 @@ read_chs:
 	
   #mov drive.cyln(%si), %ch
   mov 0x2(%si), %ch
-  #push %si
+	#push %si
   #add $1, %si
 	#mov drive.cyln(%si), %cl
 	#pop %si
   mov 0x3(%si), %cl
   shl $6, %cl
-  or 0x6(%si), %cl
   #or drive.sect(%si), %cl
+  mov 0x
   #mov drive.head(%si), %dh
-  mov 0x4(%si), %dh
   #mov drive.no(%si), %dl
-  mov (%si), %dl
-  mov $0x0, %ax
   mov %ax, %es
   mov 0x8(%bp), %bx # dist copy
 
