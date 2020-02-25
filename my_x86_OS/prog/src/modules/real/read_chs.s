@@ -28,19 +28,12 @@ read_chs:
 
 	mov 0x4(%bp), %si # src buff
 	
-  #mov drive.cyln(%si), %ch
-  mov 0x2(%si), %ch
-  #push %si
-  #add $1, %si
-	#mov drive.cyln(%si), %cl
-	#pop %si
-  mov 0x3(%si), %cl
+  mov drive.cyln.low(%si), %ch
+	mov drive.cyln.high(%si), %cl
   shl $6, %cl
-  or 0x6(%si), %cl
-  #or drive.sect(%si), %cl
-  #mov drive.head(%si), %dh
-  mov 0x4(%si), %dh
-  #mov drive.no(%si), %dl
+  or drive.sect(%si), %cl
+  mov drive.head(%si), %dh
+  mov drive.no(%si), %dl
   mov (%si), %dl
   mov $0x0, %ax
   mov %ax, %es
@@ -77,20 +70,18 @@ read_chs:
 
   ret
 
-drive: .space 0x8
 
-/*
 .section .data
 
-.set drive.size, 6
 drive:
 	.struct 0
 drive.no: 
 	.struct drive.no + 2
-drive.cyln: 
-	.struct drive.cyln + 2
+drive.cyln.low:
+	.struct drive.cyln.low + 1
+drive.cyln.high:
+	.struct drive.cyln.high + 1
 drive.head: 
 	.struct drive.head + 2
-drive.sect: 
-drive.end:
-*/
+drive.sect:
+
