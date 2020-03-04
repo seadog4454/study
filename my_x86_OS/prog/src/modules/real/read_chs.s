@@ -85,3 +85,4 @@ drive.head:
 	.struct drive.head + 2
 drive.sect:
 
+.set drive.size, 0x8

@@ -65,11 +65,10 @@ ipl:
 
 
 .align 2
-drive_tmp: .space 0x8
+drive_tmp: .space drive.size
 
 #.include "../modules/real/putc.s"
 .include "../modules/real/puts.s"
-#.include "../modules/real/itoa.s"
 .include "../modules/real/reboot.s"
 .include "../modules/real/read_chs.s"
 
@@ -79,12 +78,169 @@ drive_tmp: .space 0x8
 .Lboot_boot_sig: .fill 0x1fe - (. - _start), 0x1, 0x0
 .Lboot_BOOT_SIGNATURE: .word 0xAA55
 
+/*
+ * Can't refer to a common label in real mode and protected mode.
+ * Because these are assembled separately.
+ * So, An absolute address is required for reference in both modes.
+ * In addition, the address have to be specified in a location we understand easyly.
+ * In this program, the address will be located after signature, 0xAA55.
+ */
+FONT:
+FONT.seg: .word 0x0
+FONT.off: .word 0x0
+ACPI_DATA:
+ACPI_DATA.adr: .long 0x0
+ACPI_DATA.len: .long 0x0
+
+.include "../modules/real/itoa.s"
+.include "../modules/real/get_drive_param.s"
+.include "../modules/real/get_font_adr.s"
+.include "../modules/real/get_mem_info.s"
+
 stage_2:
   push $.Lboot_s2
   call puts
   add $0x2, %sp
-  jmp .
+
+  push $drive_tmp
+  call get_drive_param
+  add $2, %sp
+  cmp $0, %ax
+  jne .Lboot_5E
+  
+  call puts
+  add $2, %sp
+  call reboot
+
+.Lboot_5E:
+  push $.Lboot_test
+  call puts
+  add $2, %sp
+
+  movw $drive_tmp, %bx
+  
+  mov drive.no(%bx), %ax
+  push $0b0100
+  push $16
+  push $2
+  push $.Lboot_p1
+  push %ax
+  call itoa
+  add $0xa, %sp
+
+
+  mov drive.cyln.low(%bx), %ax
+  push $0b0100
+  push $16
+  push $4
+  push $.Lboot_p2
+  push %ax
+  call itoa
+  add $0xa, %sp
+
+
+  mov drive.head(%bx), %ax
+  push $0b0100
+  push $16
+  push $2
+  push $.Lboot_p3
+  push %ax
+  call itoa
+  add $0xa, %sp
+
+  mov drive.sect(%bx), %ax
+  push $0b0100
+  push $16
+  push $2
+  push $.Lboot_p4
+  push %ax
+  call itoa
+  add $0xa, %sp
+
+  push $.Lboot_s3
+  call puts
+  add $0x2, %sp
+
+  jmp stage_3rd
 
 .Lboot_s2: .string "2nd stage...\r\n"
+.Lboot_e1: .string "Can't get drive parameter." 
+.Lboot_s3: .ascii " Drive:0x"
+.Lboot_p1: .ascii "  , C:0x"
+.Lboot_p2: .ascii "    , H:0x"
+.Lboot_p3: .ascii "  , S:0x"
+.Lboot_p4: .string "  \r\n"
+.Lboot_test: .string "test\r\n"
 
-.fill 0x2000 - (. - _start), 0x1, 0x0 # padding
+
+
+stage_3rd:
+  push $.Lboot_3rd_s0
+  call puts
+  add $2, %sp
+
+  push $FONT
+  call get_font_adr
+  add $2, %sp
+
+  push $0b0100
+  push $16
+  push $4
+  push $.Lboot_3rd_p1
+  pushw $FONT.seg
+  call itoa
+  add $0xa, %sp
+
+  push $0b0100
+  push $16
+  push $4
+  push $.Lboot_3rd_p2
+  pushw $FONT.off
+  call itoa
+  add $0xa, %sp
+
+  push $.Lboot_3rd_s1
+  call puts
+  add $2, %sp
+
+
+  call get_mem_info
+  mov (ACPI_DATA.adr), %eax
+  cmp $0, %eax
+  je .Lboot_3rd_10E
+
+  push $0b0100
+  push $0xf
+  push $0x4
+  push $.Lboot_3rd_p4
+  push %ax
+  call itoa
+  add $0xa, %sp
+ 
+  push $0b0100
+  push $0xf
+  push $0x4
+  push $.Lboot_3rd_p3
+  push %ax
+  call itoa
+  add $0xa, %sp
+
+  push $.Lboot_3rd_s2
+  call puts
+  add $2, %sp
+
+ .Lboot_3rd_10E:
+  jmp .
+
+.Lboot_3rd_s0: .string "3rd stage...\r\n"
+.Lboot_3rd_s1: .ascii "Font address="
+.Lboot_3rd_p1: .ascii "ZZZZ:"
+.Lboot_3rd_p2: .string "ZZZZ\r\n"
+.string "\r\n"
+
+.Lboot_3rd_s2: .ascii "ACPI data="
+.Lboot_3rd_p3: .ascii "ZZZZ"
+.Lboot_3rd_p4: .string "ZZZZ\r\n"
+
+.fill 0x2000 - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
+
