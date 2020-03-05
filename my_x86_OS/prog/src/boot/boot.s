@@ -17,7 +17,6 @@ ipl:
   mov %ax, %es
   mov %ax, %ss 
   mov (.Lboot_BOOT_LOAD), %sp
-  mov $0x7C00, %sp
 	sti
 
 	movw $drive_tmp, %bx
@@ -187,7 +186,7 @@ stage_3rd:
   push $16
   push $4
   push $.Lboot_3rd_p1
-  pushw $FONT.seg
+  pushw (FONT.seg)
   call itoa
   add $0xa, %sp
 
@@ -195,7 +194,7 @@ stage_3rd:
   push $16
   push $4
   push $.Lboot_3rd_p2
-  pushw $FONT.off
+  pushw (FONT.off)
   call itoa
   add $0xa, %sp
 
@@ -210,15 +209,17 @@ stage_3rd:
   je .Lboot_3rd_10E
 
   push $0b0100
-  push $0xf
+  push $0x10
   push $0x4
   push $.Lboot_3rd_p4
   push %ax
   call itoa
   add $0xa, %sp
+
+  shr $0x10, %eax
  
   push $0b0100
-  push $0xf
+  push $0x10
   push $0x4
   push $.Lboot_3rd_p3
   push %ax
@@ -232,13 +233,13 @@ stage_3rd:
  .Lboot_3rd_10E:
   jmp .
 
-.Lboot_3rd_s0: .string "3rd stage...\r\n"
-.Lboot_3rd_s1: .ascii "Font address="
+.Lboot_3rd_s0: .string "3rd stage...\n\r"
+.Lboot_3rd_s1: .ascii " Font address="
 .Lboot_3rd_p1: .ascii "ZZZZ:"
-.Lboot_3rd_p2: .string "ZZZZ\r\n"
-.string "\r\n"
+.Lboot_3rd_p2: .string "ZZZZ\n\r"
+.string "\n\r"
 
-.Lboot_3rd_s2: .ascii "ACPI data="
+.Lboot_3rd_s2: .ascii " ACPI data="
 .Lboot_3rd_p3: .ascii "ZZZZ"
 .Lboot_3rd_p4: .string "ZZZZ\r\n"
 
