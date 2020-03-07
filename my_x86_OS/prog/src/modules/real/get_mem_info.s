@@ -40,6 +40,7 @@
 .Lget_mem_info_3E:
   push %di
   call put_mem_info
+  add $0x2, %sp
 
   mov 0x10(%di), %eax
   cmp $3, %eax
@@ -78,6 +79,7 @@
   call puts
   add $2, %sp
 
+
   pop %bp
   pop %di
   pop %si
@@ -107,7 +109,6 @@
  *  adr: address to refer to the memory infomation
  */
 
-.code16
 put_mem_info:
   push %bp
   mov %sp, %bp
@@ -230,6 +231,8 @@ put_mem_info:
 
   mov %bp, %sp
   pop %bp
+
+
 
   ret
 

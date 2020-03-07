@@ -95,6 +95,8 @@ ACPI_DATA.len: .long 0x0
 .include "../modules/real/get_drive_param.s"
 .include "../modules/real/get_font_adr.s"
 .include "../modules/real/get_mem_info.s"
+.include "../modules/real/kbc.s"
+
 
 stage_2:
   push $.Lboot_s2
@@ -202,8 +204,8 @@ stage_3rd:
   call puts
   add $2, %sp
 
-
   call get_mem_info
+
   mov (ACPI_DATA.adr), %eax
   cmp $0, %eax
   je .Lboot_3rd_10E
@@ -226,12 +228,15 @@ stage_3rd:
   call itoa
   add $0xa, %sp
 
+
   push $.Lboot_3rd_s2
   call puts
   add $2, %sp
 
- .Lboot_3rd_10E:
-  jmp .
+.Lboot_3rd_10E:
+
+  jmp stage_4
+
 
 .Lboot_3rd_s0: .string "3rd stage...\n\r"
 .Lboot_3rd_s1: .ascii " Font address="
@@ -242,6 +247,56 @@ stage_3rd:
 .Lboot_3rd_s2: .ascii " ACPI data="
 .Lboot_3rd_p3: .ascii "ZZZZ"
 .Lboot_3rd_p4: .string "ZZZZ\r\n"
+
+
+
+stage_4:
+
+  push $.Lstage_4_s0
+  call puts
+  add $0x2, %sp
+
+  cli
+  
+  push $0xAD # invalidate keyboard
+  call KBC_Cmd_Write
+  add $0x2, %sp
+
+  push $0xD0 # setting: read value of output port
+  call KBC_Cmd_Write
+  add $0x2, %sp
+
+  push $.Lstage_4_key # read value of output port
+  call KBC_Data_Read
+  add $0x2, %sp
+
+  mov (.Lstage_4_key), %bl 
+  or $0x2, %bl # activate A20 gate, A20 gate has bit1 of output port.
+
+  push $0xD1 # setting: write value to output port
+  call KBC_Cmd_Write
+  add $0x2, %sp
+
+  push %bx # write value to output port
+  call KBC_Data_Write
+  add $0x2, %sp
+
+  push $0xAE # activate keyboard
+  call KBC_Cmd_Write
+  add $0x2, %sp
+
+  sti
+ 
+  push $.Lstage_4_s1
+  call puts
+  add $0x2, %sp
+  
+  jmp .
+
+.Lstage_4_key: .word 0x0
+.Lstage_4_s0: .string "4th stage...\n\r"
+.Lstage_4_s1: .string "A20 Gate Enabled.\n\r"
+
 
 .fill 0x2000 - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
 
