@@ -61,7 +61,8 @@ ipl:
 .Lboot_BOOT_SIZE: .word 0x2000 #(1024 * 8)
 .Lboot_SECT_SIZE: .word 512
 .Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
-
+.Lboot_BOOT_END: .word 0x9C00
+.Lboot_KERNEL_SECT: .word 
 
 .align 2
 drive_tmp: .space drive.size
@@ -291,12 +292,32 @@ stage_4:
   call puts
   add $0x2, %sp
   
-  jmp .
+  jmp stage5
 
 .Lstage_4_key: .word 0x0
 .Lstage_4_s0: .string "4th stage...\n\r"
 .Lstage_4_s1: .string "A20 Gate Enabled.\n\r"
 
 
+stage5:
+	push $.Lstage5_s0
+	call puts
+	add $0x2, %sp
+	
+	push $.Lboot_BOOT_END$
+	push $.Lboot_KERNEL_SECT
+	push $.BOOT_SECT
+	push $drive_tmp
+	cmp (.Lboot_KERNEL_SECT), %ax
+	jz .Lstage5_10E
+	push $.Lstage5_e0
+	call puts
+	add $0x2, %sp
+	call reboot
+.Lstage5_10E
+	jmp .
+
+.Lstage5_s0: string "5th stage...\n\r"
+.Lstage5_e0: string "Failure load kernel...\n\r"
 .fill 0x2000 - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
 
