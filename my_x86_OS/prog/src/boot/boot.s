@@ -60,9 +60,9 @@ ipl:
 .Lboot_BOOT_LOAD: .word 0x7C00
 .Lboot_BOOT_SIZE: .word 0x2000 #(1024 * 8)
 .Lboot_SECT_SIZE: .word 512
-.Lboot_BOOT_SECT: .word 16 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
+.Lboot_BOOT_SECT: .word 0x10 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
 .Lboot_BOOT_END: .word 0x9C00
-.Lboot_KERNEL_SECT: .word 
+.Lboot_KERNEL_SECT: .word 0x10 #(.Lboot_KERNEL_SIZE / .Lboot_SECT_SIZE)
 
 .align 2
 drive_tmp: .space drive.size
@@ -97,7 +97,8 @@ ACPI_DATA.len: .long 0x0
 .include "../modules/real/get_font_adr.s"
 .include "../modules/real/get_mem_info.s"
 .include "../modules/real/kbc.s"
-
+.include "../modules/real/read_lba.s"
+.include "../modules/real/lba_chs.s"
 
 stage_2:
   push $.Lboot_s2
@@ -291,33 +292,113 @@ stage_4:
   push $.Lstage_4_s1
   call puts
   add $0x2, %sp
+
+  push $.Lstage_4_s2
+  call puts
+  add $0x2, %sp
+
+  mov $0x0, %bx
+.Lstage_4_10L:
+
+  mov $0x00, %ah
+  int $0x16
+
+  cmp 0x31, %al
+  jb .Lstage_4_10E
   
+  cmp $0x33, %al
+  ja .Lstage_4_10E
+
+  mov %al, %cl
+  dec %cl
+  and $0x03, %cl
+  mov $0x0001, %ax
+  shl %cl, %ax
+  xor %ax, %bx
+
+  cli
+
+  push $0xAD
+  call KBC_Cmd_Write
+  add $0x2, %sp
+
+  push $0xED
+  call KBC_Data_Write
+  add $0x2, %sp
+
+  push $.Lstage_4_key
+  call KBC_Data_Read
+  add $0x2, %sp
+
+  cmpb $0xFA, (.Lstage_4_key)
+  jne .Lstage_4_11F
+
+  push %bx
+  call KBC_Data_Write
+  add $0x2, %sp
+
+  jmp .Lstage_4_11E
+.Lstage_4_11F:
+  
+  push $0b0100
+  push $0x10
+  push $0x2
+  push $.Lstage_4_e1
+  pushw (.Lstage_4_key)
+  call itoa
+  add $0xA, %sp
+
+  push $.Lstage_4_e0
+  call puts
+  add $0x2, %sp
+
+.Lstage_4_11E:
+    push $0xAE
+    call KBC_Cmd_Write
+    add $0x2, %sp
+
+
+  sti
+  
+  jmp .Lstage_4_10L
+
+.Lstage_4_10E:
+
+  push $.Lstage_4_s3
+  call puts
+  add $0x2, %sp
+
   jmp stage5
 
 .Lstage_4_key: .word 0x0
 .Lstage_4_s0: .string "4th stage...\n\r"
 .Lstage_4_s1: .string "A20 Gate Enabled.\n\r"
+.Lstage_4_s2: .string "Keyboard LED Test..."
+.Lstage_4_s3: .string "(done)\n\r"
 
+.Lstage_4_e0: .ascii "["
+.Lstage_4_e1: .string "ZZ]"
 
 stage5:
 	push $.Lstage5_s0
 	call puts
 	add $0x2, %sp
 	
-	push $.Lboot_BOOT_END$
-	push $.Lboot_KERNEL_SECT
-	push $.BOOT_SECT
+	push (.Lboot_BOOT_END)
+	push (.Lboot_KERNEL_SECT)
+	push (.Lboot_BOOT_SECT)
 	push $drive_tmp
-	cmp (.Lboot_KERNEL_SECT), %ax
+	call read_lba
+  cmp (.Lboot_KERNEL_SECT), %ax
 	jz .Lstage5_10E
 	push $.Lstage5_e0
 	call puts
 	add $0x2, %sp
 	call reboot
-.Lstage5_10E
+.Lstage5_10E:
 	jmp .
 
-.Lstage5_s0: string "5th stage...\n\r"
-.Lstage5_e0: string "Failure load kernel...\n\r"
+.Lstage5_s0: .string "5th stage...\n\r"
+.Lstage5_e0: .string "Failure load kernel...\n\r"
 .fill 0x2000 - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
 

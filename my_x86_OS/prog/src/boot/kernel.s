@@ -1,4 +1,5 @@
 .code32
+.global kernel
 
 kernel:
 	
