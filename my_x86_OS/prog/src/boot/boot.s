@@ -1,3 +1,5 @@
+.include "./define.s"
+
 .code16
 
 .section .text
@@ -16,8 +18,10 @@ ipl:
   mov %ax, %ds
   mov %ax, %es
   mov %ax, %ss 
-  mov (.Lboot_BOOT_LOAD), %sp
-	sti
+  #mov (.Lboot_BOOT_LOAD, %sp
+	mov $BOOT_LOAD, %sp
+
+  sti
 
 	movw $drive_tmp, %bx
 	movw $0x0, drive.no(%bx)
@@ -31,15 +35,14 @@ ipl:
   call puts
   add $0x2, %sp
 
-	mov (.Lboot_BOOT_LOAD), %ax
-	mov (.Lboot_SECT_SIZE), %cx
-  mov (.Lboot_BOOT_SECT), %bx
+	mov $BOOT_LOAD, %ax
+	mov $SECT_SIZE, %cx
+  mov $BOOT_SECT, %bx
 	sub $0x1, %bx
 	add %ax, %cx
 
 
-
-	push %cx
+  push %cx
   push %bx
   push $drive_tmp
 	call read_chs
@@ -57,12 +60,12 @@ ipl:
 
 .Lboot_s0: .string "Booting...\n\r"
 .Lboot_e0: .string "Error:sector read"
-.Lboot_BOOT_LOAD: .word 0x7C00
-.Lboot_BOOT_SIZE: .word 0x2000 #(1024 * 8)
-.Lboot_SECT_SIZE: .word 512
-.Lboot_BOOT_SECT: .word 0x10 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
-.Lboot_BOOT_END: .word 0x9C00
-.Lboot_KERNEL_SECT: .word 0x10 #(.Lboot_KERNEL_SIZE / .Lboot_SECT_SIZE)
+#.Lboot_BOOT_LOAD: .word 0x7C00
+#.Lboot_BOOT_SIZE: .word 0x2000 #(1024 * 8)
+#.Lboot_SECT_SIZE: .word 512
+#.Lboot_BOOT_SECT: .word 0x10 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
+#.Lboot_BOOT_END: .word 0x9C00
+#.Lboot_KERNEL_SECT: .word 0x10 #(.Lboot_KERNEL_SIZE / .Lboot_SECT_SIZE)
 
 .align 2
 drive_tmp: .space drive.size
@@ -76,7 +79,7 @@ drive_tmp: .space drive.size
 /* write boot signature in 0x200 */
 
 .Lboot_boot_sig: .fill 0x1fe - (. - _start), 0x1, 0x0
-.Lboot_BOOT_SIGNATURE: .word 0xAA55
+BOOT_SIGNATURE: .word 0xAA55
 
 /*
  * Can't refer to a common label in real mode and protected mode.
@@ -384,21 +387,97 @@ stage5:
 	call puts
 	add $0x2, %sp
 	
-	push (.Lboot_BOOT_END)
-	push (.Lboot_KERNEL_SECT)
-	push (.Lboot_BOOT_SECT)
+	push $BOOT_END
+	push $KERNEL_SECT
+	push $BOOT_SECT
 	push $drive_tmp
 	call read_lba
-  cmp (.Lboot_KERNEL_SECT), %ax
+  cmp $KERNEL_SECT, %ax
 	jz .Lstage5_10E
 	push $.Lstage5_e0
 	call puts
 	add $0x2, %sp
 	call reboot
 .Lstage5_10E:
-	jmp .
+	jmp stage6
 
 .Lstage5_s0: .string "5th stage...\n\r"
 .Lstage5_e0: .string "Failure load kernel...\n\r"
-.fill 0x2000 - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
 
+
+stage6:
+  push $.Lstage6_s0
+  call puts
+  add $0x2, %sp
+.Lstage6_10L:
+  
+  mov $0x0, %ah
+  int $0x16
+  cmp $0x20, %al
+  jne .Lstage6_10L
+
+  mov $0x0012, %ax # VGA 640 * 480
+  int $0x10
+
+  jmp stage7
+
+.Lstage6_s0: .ascii "6th stage...\n\r\n\r"
+.string "[Push SPACE key to protect mode...]\n\r"
+
+
+
+.align 4
+
+GDT: .quad 0x0000000000000000
+.cs: .quad 0x00CF9A000000FFFF
+.ds: .quad 0x00CF92000000FFFF
+.gdt_end:
+
+.set SEL_CODE, .cs - GDT
+.set SEL_DATA, .ds - GDT
+
+GDTR: .word .gdt_end - GDT - 1 
+      .long GDT
+
+IDTR: .word 0x0
+      .long 0x0
+
+
+
+
+stage7:
+  cli
+
+  lgdt (GDTR)
+  lidt (IDTR)
+  
+  mov %cr0, %eax
+  or $0x1, %ax
+  mov %eax, %cr0
+
+  jmp . + 2
+  nop
+
+.code32
+
+.byte 0x66
+jmp $SEL_CODE, $CODE_32
+
+
+CODE_32:
+  mov $SEL_DATA, %ax
+  mov %ax, %ds
+  mov %ax, %es
+  mov %ax, %fs
+  mov %ax, %gs
+  mov %ax, %ss
+  
+  mov $KERNEL_SIZE/4, %ecx
+  mov $BOOT_END, %esi
+  mov $KERNEL_LOAD, %edi
+  cld
+  rep movsd
+  
+  jmp KERNEL_LOAD
+
+.fill BOOT_SIZE - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE

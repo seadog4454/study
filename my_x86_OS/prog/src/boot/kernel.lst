@@ -1,0 +1,118 @@
+GAS LISTING kernel.s 			page 1
+
+
+   1              	.include "./define.s"
+   1              	.set BOOT_LOAD, 0x7C00
+   2              	.set BOOT_SIZE, 0x2000 #(1024 * 8)
+   3              	.set SECT_SIZE, 512
+   4              	.set BOOT_SECT, 0x10 #(.Lboot_BOOT_SIZE / .Lboot_SECT_SIZE)
+   5              	.set BOOT_END, 0x9C00
+   6              	.set KERNEL_SECT, 0x10 #(.Lboot_KERNEL_SIZE / .Lboot_SECT_SIZE)
+   7              	.set KERNEL_SIZE, 8192
+   8              	.set VRAM, 0x000A0000
+   9              	.set KERNEL_LOAD, 0x00101000
+   2              	
+   3              	.code32
+   4              	.global kernel
+   5              	
+   6              	
+   7              	kernel:
+   8              	  
+   9              	  # Get font addr. The addr is had in boot.s(where, the addr = BOOT_LOAD + SECT_SIZE).
+  10              	  #push %ebx
+  11              	  #push %ecx
+  12              	
+  13              	  #mov $BOOT_LOAD, %ebx
+  14              	  #mov $SECT_SIZE, %ecx
+  15              	  #add %ecx, %ebx
+  16              	  #mov %ebx, %esi
+  17              	  #pop %ecx
+  18              	  #pop %ebx
+  19              	  
+  20 0000 BE007E00 	  mov $0x7E00, %esi
+  20      00
+  21              	
+  22 0005 0FB706   	  movzxw (%esi), %eax
+  23 0008 0FB75E02 	  movzxw 0x2(%esi), %ebx # segment
+  24 000c C1E004   	  shl $0x4, %eax # offset
+  25 000f 01D8     	  add %ebx, %eax
+  26 0011 A3000000 	  mov %eax, (FONT_ADR)
+  26      00
+  27              	  
+  28              	  # Draw horizontal line(8bit).
+  29 0016 B407     	  mov $0x7, %ah # set 1bit in RGB plane.
+  30 0018 B002     	  mov $0x2, %al # map mask register
+  31 001a 66BAC403 	  mov $0x3C4, %dx # sequence control port
+  32 001e 66EF     	  out %ax, %dx
+  33              	  
+  34 0020 C6050000 	  movb $0xFF, (VRAM)
+  34      0A00FF
+  35              	  
+  36 0027 B404     	  mov $0x4, %ah
+  37 0029 66EF     	  out %ax, %dx
+  38              	
+  39 002b C6050100 	  movb $0xFF, (VRAM + 0x1)
+  39      0A00FF
+  40              	  
+  41 0032 B402     	  mov $0x2, %ah
+  42 0034 66EF     	  out %ax, %dx
+  43              	
+  44 0036 C6050200 	  movb $0xFF, (VRAM + 0x2)
+GAS LISTING kernel.s 			page 2
+
+
+  44      0A00FF
+  45              	  
+  46 003d B401     	  mov $0x1, %ah
+  47 003f 66EF     	  out %ax, %dx
+  48              	
+  49 0041 C6050300 	  movb $0xFF, (VRAM + 0x3)
+  49      0A00FF
+  50              	/*
+  51              	  # Draw horizontal line is traversed screen.
+  52              	  
+  53              	  mov $0x02, %ah
+  54              	  out %ax, %dx
+  55              	
+  56              	  lea (VRAM + 80), %edi
+  57              	  mov $80, %ecx
+  58              	  mov $0xFF, %al
+  59              	  rep stosb
+  60              	
+  61              	
+  62              	  # Draw char in the 3rd row.
+  63              	  mov $0x41, %esi
+  64              	  shl $0x4, %esi
+  65              	  add (FONT_ADR), %esi
+  66              	  
+  67              	  mov $0x2, %edi
+  68              	  shl $0x8, %edi
+  69              	  #lea (%edi * 4 + %edi + VRAM), %edi
+  70              	*/
+  71 0048 EBFE     	  jmp .
+  72              	
+  73 004a 6690     	.align 4
+  74 004c 00000000 	FONT_ADR: .int 0x0
+  75              	
+  76 0050 00000000 	.fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
+  76      00000000 
+  76      00000000 
+  76      00000000 
+  76      00000000 
+GAS LISTING kernel.s 			page 3
+
+
+DEFINED SYMBOLS
+          ./define.s:1      *ABS*:0000000000007c00 BOOT_LOAD
+          ./define.s:2      *ABS*:0000000000002000 BOOT_SIZE
+          ./define.s:3      *ABS*:0000000000000200 SECT_SIZE
+          ./define.s:4      *ABS*:0000000000000010 BOOT_SECT
+          ./define.s:5      *ABS*:0000000000009c00 BOOT_END
+          ./define.s:6      *ABS*:0000000000000010 KERNEL_SECT
+          ./define.s:7      *ABS*:0000000000002000 KERNEL_SIZE
+          ./define.s:8      *ABS*:00000000000a0000 VRAM
+          ./define.s:9      *ABS*:0000000000101000 KERNEL_LOAD
+            kernel.s:7      .text:0000000000000000 kernel
+            kernel.s:74     .text:000000000000004c FONT_ADR
+
+NO UNDEFINED SYMBOLS
