@@ -29,77 +29,129 @@ GAS LISTING kernel.s 			page 1
   17              	  #pop %ecx
   18              	  #pop %ebx
   19              	  
-  20 0000 BE007E00 	  mov $0x7E00, %esi
+  20 0000 BE007E00 	  mov $(BOOT_LOAD + SECT_SIZE), %esi
   20      00
-  21              	
-  22 0005 0FB706   	  movzxw (%esi), %eax
-  23 0008 0FB75E02 	  movzxw 0x2(%esi), %ebx # segment
-  24 000c C1E004   	  shl $0x4, %eax # offset
-  25 000f 01D8     	  add %ebx, %eax
-  26 0011 A3000000 	  mov %eax, (FONT_ADR)
-  26      00
-  27              	  
-  28              	  # Draw horizontal line(8bit).
-  29 0016 B407     	  mov $0x7, %ah # set 1bit in RGB plane.
-  30 0018 B002     	  mov $0x2, %al # map mask register
-  31 001a 66BAC403 	  mov $0x3C4, %dx # sequence control port
-  32 001e 66EF     	  out %ax, %dx
-  33              	  
-  34 0020 C6050000 	  movb $0xFF, (VRAM)
-  34      0A00FF
-  35              	  
-  36 0027 B404     	  mov $0x4, %ah
-  37 0029 66EF     	  out %ax, %dx
-  38              	
-  39 002b C6050100 	  movb $0xFF, (VRAM + 0x1)
-  39      0A00FF
-  40              	  
-  41 0032 B402     	  mov $0x2, %ah
-  42 0034 66EF     	  out %ax, %dx
-  43              	
-  44 0036 C6050200 	  movb $0xFF, (VRAM + 0x2)
+  21 0005 0FB706   	  movzxw (%esi), %eax
+  22 0008 0FB75E02 	  movzxw 0x2(%esi), %ebx # segment
+  23 000c C1E004   	  shl $0x4, %eax # offset
+  24 000f 01D8     	  add %ebx, %eax
+  25 0011 A3000000 	  mov %eax, (FONT_ADR)
+  25      00
+  26              	  
+  27              	  # Draw horizontal line(8bit).
+  28 0016 B407     	  mov $0x7, %ah # set 1bit in RGB plane.
+  29 0018 B002     	  mov $0x2, %al # map mask register
+  30 001a 66BAC403 	  mov $0x3C4, %dx # sequence control port
+  31 001e 66EF     	  out %ax, %dx
+  32              	  
+  33 0020 C6050000 	  movb $0xFF, (VRAM)
+  33      0A00FF
+  34              	  
+  35 0027 B404     	  mov $0x4, %ah
+  36 0029 66EF     	  out %ax, %dx
+  37              	
+  38 002b C6050100 	  movb $0xFF, (VRAM + 0x1)
+  38      0A00FF
+  39              	  
+  40 0032 B402     	  mov $0x2, %ah
+  41 0034 66EF     	  out %ax, %dx
+  42              	
+  43 0036 C6050200 	  movb $0xFF, (VRAM + 0x2)
+  43      0A00FF
 GAS LISTING kernel.s 			page 2
 
 
-  44      0A00FF
-  45              	  
-  46 003d B401     	  mov $0x1, %ah
-  47 003f 66EF     	  out %ax, %dx
-  48              	
-  49 0041 C6050300 	  movb $0xFF, (VRAM + 0x3)
-  49      0A00FF
-  50              	/*
-  51              	  # Draw horizontal line is traversed screen.
-  52              	  
-  53              	  mov $0x02, %ah
-  54              	  out %ax, %dx
-  55              	
-  56              	  lea (VRAM + 80), %edi
-  57              	  mov $80, %ecx
-  58              	  mov $0xFF, %al
-  59              	  rep stosb
-  60              	
-  61              	
-  62              	  # Draw char in the 3rd row.
-  63              	  mov $0x41, %esi
-  64              	  shl $0x4, %esi
-  65              	  add (FONT_ADR), %esi
-  66              	  
-  67              	  mov $0x2, %edi
-  68              	  shl $0x8, %edi
-  69              	  #lea (%edi * 4 + %edi + VRAM), %edi
-  70              	*/
-  71 0048 EBFE     	  jmp .
-  72              	
-  73 004a 6690     	.align 4
-  74 004c 00000000 	FONT_ADR: .int 0x0
-  75              	
-  76 0050 00000000 	.fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
-  76      00000000 
-  76      00000000 
-  76      00000000 
-  76      00000000 
+  44              	  
+  45 003d B401     	  mov $0x1, %ah
+  46 003f 66EF     	  out %ax, %dx
+  47              	
+  48 0041 C6050300 	  movb $0xFF, (VRAM + 0x3)
+  48      0A00FF
+  49              	
+  50              	  # Draw horizontal line is traversed screen.
+  51              	  
+  52 0048 B402     	  mov $0x02, %ah
+  53 004a 66EF     	  out %ax, %dx
+  54              	
+  55 004c 8D3D5000 	  lea (VRAM + 80), %edi
+  55      0A00
+  56 0052 B9500000 	  mov $80, %ecx
+  56      00
+  57 0057 B0FF     	  mov $0xFF, %al
+  58 0059 F3AA     	  rep stosb
+  59              	
+  60              	  # Draw 8 bit's rectangle in the 2nd row.
+  61              	  
+  62              	  # add offset 1280(oen line)
+  63 005b BF010000 	  mov $0x1, %edi # number of the lines
+  63      00
+  64 0060 C1E708   	  shl $0x8, %edi # %edi * 256
+  65 0063 8DBCBF00 	  lea VRAM(%edi, %edi, 0x4), %edi
+  65      000A00
+  66              	
+  67              	  # x = 640, 80 * 8 bits = 640
+  68 006a 66C707FF 	  movw $0xFF, (80*0)(%edi)
+  68      00
+  69 006f 66C74750 	  movw $0xFF, (80*1)(%edi)
+  69      FF00
+  70 0075 66C787A0 	  movw $0xFF, (80*2)(%edi)
+  70      000000FF 
+  70      00
+  71 007e 66C787F0 	  movw $0xFF, (80*3)(%edi)
+  71      000000FF 
+  71      00
+  72 0087 66C78740 	  movw $0xFF, (80*4)(%edi)
+  72      010000FF 
+  72      00
+  73 0090 66C78790 	  movw $0xFF, (80*5)(%edi)
+  73      010000FF 
+  73      00
+  74 0099 66C787E0 	  movw $0xFF, (80*6)(%edi)
+  74      010000FF 
+  74      00
+  75 00a2 66C78730 	  movw $0xFF, (80*7)(%edi)
+  75      020000FF 
+  75      00
+  76              	    
+  77              	
+  78              	  # Draw char in the 3rd row.
+  79 00ab BE410000 	  mov $0x41, %esi
+  79      00
+  80 00b0 C1E604   	  shl $0x4, %esi
 GAS LISTING kernel.s 			page 3
+
+
+  81 00b3 03350000 	  add (FONT_ADR), %esi
+  81      0000
+  82              	  
+  83              	  # add offset 1280(oen line)
+  84 00b9 BF020000 	  mov $0x2, %edi # number of the lines
+  84      00
+  85 00be C1E708   	  shl $0x8, %edi # %edi * 256
+  86 00c1 8DBCBF00 	  lea VRAM(%edi, %edi, 0x4), %edi
+  86      000A00
+  87              	
+  88 00c8 B9100000 	  mov $0x10, %ecx
+  88      00
+  89              	.Lkernel_10L:
+  90              	
+  91 00cd A4       	  movsb
+  92 00ce 83C74F   	  add $(80 - 1), %edi
+  93 00d1 E2FA     	  loop .Lkernel_10L
+  94              	
+  95              	
+  96 00d3 EBFE     	  jmp .
+  97              	
+  98              	
+  99 00d5 0F1F00   	.align 4
+ 100 00d8 00000000 	FONT_ADR: .long 0x0
+ 101              	
+ 102 00dc 00000000 	.fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
+ 102      00000000 
+ 102      00000000 
+ 102      00000000 
+ 102      00000000 
+GAS LISTING kernel.s 			page 4
 
 
 DEFINED SYMBOLS
@@ -113,6 +165,6 @@ DEFINED SYMBOLS
           ./define.s:8      *ABS*:00000000000a0000 VRAM
           ./define.s:9      *ABS*:0000000000101000 KERNEL_LOAD
             kernel.s:7      .text:0000000000000000 kernel
-            kernel.s:74     .text:000000000000004c FONT_ADR
+            kernel.s:100    .text:00000000000000d8 FONT_ADR
 
 NO UNDEFINED SYMBOLS

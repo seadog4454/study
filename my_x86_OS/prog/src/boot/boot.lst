@@ -1529,39 +1529,34 @@ GAS LISTING boot.s 			page 1
  463 0a07 66       	.byte 0x66
  464 0a08 EA000000 	jmp $SEL_CODE, $CODE_32
  464      000800
- 465              	#jmp $0x8, CODE_32
+ 465              	
  466              	
- 467              	
- 468              	CODE_32:
- 469 0a0f 66B81000 	  mov $SEL_DATA, %ax
- 470 0a13 8ED8     	  mov %ax, %ds
- 471 0a15 8EC0     	  mov %ax, %es
- 472 0a17 8EE0     	  mov %ax, %fs
- 473 0a19 8EE8     	  mov %ax, %gs
- 474 0a1b 8ED0     	  mov %ax, %ss
- 475              	  
- 476 0a1d B9000800 	  mov $KERNEL_SIZE/4, %ecx
+ 467              	CODE_32:
+ 468 0a0f 66B81000 	  mov $SEL_DATA, %ax
+ 469 0a13 8ED8     	  mov %ax, %ds
+ 470 0a15 8EC0     	  mov %ax, %es
+ 471 0a17 8EE0     	  mov %ax, %fs
+ 472 0a19 8EE8     	  mov %ax, %gs
+ 473 0a1b 8ED0     	  mov %ax, %ss
+ 474              	  
+ 475 0a1d B9000800 	  mov $KERNEL_SIZE/4, %ecx
+ 475      00
+ 476 0a22 BE009C00 	  mov $BOOT_END, %esi
  476      00
- 477              	  #mov $2048, %ecx # copy every unit, 4byte(32 bits)
- 478 0a22 BE009C00 	  mov $BOOT_END, %esi
- 478      00
- 479 0a27 BF001010 	  mov $KERNEL_LOAD, %edi
- 479      00
- 480 0a2c FC       	  cld
- 481 0a2d F3A5     	  rep movsd
- 482              	  
- 483 0a2f E9000000 	  jmp KERNEL_LOAD
- 483      00
- 484              	
- 485 0a34 00000000 	.fill BOOT_SIZE - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
- 485      00000000 
- 485      00000000 
- 485      00000000 
- 485      00000000 
+ 477 0a27 BF001010 	  mov $KERNEL_LOAD, %edi
+ 477      00
+ 478 0a2c FC       	  cld
+ 479 0a2d F3A5     	  rep movsd
+ 480              	  
+ 481 0a2f E9000000 	  jmp KERNEL_LOAD
+ 481      00
+ 482              	
+ 483 0a34 00000000 	.fill BOOT_SIZE - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
+ 483      00000000 
+ 483      00000000 
+ 483      00000000 
+ 483      00000000 
 GAS LISTING boot.s 			page 27
-
-
-GAS LISTING boot.s 			page 28
 
 
 DEFINED SYMBOLS
@@ -1621,7 +1616,7 @@ DEFINED SYMBOLS
               boot.s:431    .text:00000000000009cc GDT
               boot.s:432    .text:00000000000009d4 .cs
               boot.s:433    .text:00000000000009dc .ds
-GAS LISTING boot.s 			page 29
+GAS LISTING boot.s 			page 28
 
 
               boot.s:434    .text:00000000000009e4 .gdt_end
@@ -1629,6 +1624,6 @@ DEFINED SYMBOLS
               boot.s:437    *ABS*:0000000000000010 SEL_DATA
               boot.s:439    .text:00000000000009e4 GDTR
               boot.s:442    .text:00000000000009ea IDTR
-              boot.s:468    .text:0000000000000a0f CODE_32
+              boot.s:467    .text:0000000000000a0f CODE_32
 
 NO UNDEFINED SYMBOLS

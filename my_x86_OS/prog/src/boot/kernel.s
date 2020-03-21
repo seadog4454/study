@@ -17,8 +17,7 @@ kernel:
   #pop %ecx
   #pop %ebx
   
-  mov $0x7E00, %esi
-
+  mov $(BOOT_LOAD + SECT_SIZE), %esi
   movzxw (%esi), %eax
   movzxw 0x2(%esi), %ebx # segment
   shl $0x4, %eax # offset
@@ -47,7 +46,7 @@ kernel:
   out %ax, %dx
 
   movb $0xFF, (VRAM + 0x3)
-/*
+
   # Draw horizontal line is traversed screen.
   
   mov $0x02, %ah
@@ -58,19 +57,46 @@ kernel:
   mov $0xFF, %al
   rep stosb
 
+  # Draw 8 bit's rectangle in the 2nd row.
+  
+  # add offset 1280(oen line)
+  mov $0x1, %edi # number of the lines
+  shl $0x8, %edi # %edi * 256
+  lea VRAM(%edi, %edi, 0x4), %edi
+
+  # x = 640, 80 * 8 bits = 640
+  movw $0xFF, (80*0)(%edi)
+  movw $0xFF, (80*1)(%edi)
+  movw $0xFF, (80*2)(%edi)
+  movw $0xFF, (80*3)(%edi)
+  movw $0xFF, (80*4)(%edi)
+  movw $0xFF, (80*5)(%edi)
+  movw $0xFF, (80*6)(%edi)
+  movw $0xFF, (80*7)(%edi)
+    
 
   # Draw char in the 3rd row.
   mov $0x41, %esi
   shl $0x4, %esi
   add (FONT_ADR), %esi
   
-  mov $0x2, %edi
-  shl $0x8, %edi
-  #lea (%edi * 4 + %edi + VRAM), %edi
-*/
+  # add offset 1280(oen line)
+  mov $0x2, %edi # number of the lines
+  shl $0x8, %edi # %edi * 256
+  lea VRAM(%edi, %edi, 0x4), %edi
+
+  mov $0x10, %ecx
+.Lkernel_10L:
+
+  movsb
+  add $(80 - 1), %edi
+  loop .Lkernel_10L
+
+
   jmp .
 
+
 .align 4
-FONT_ADR: .int 0x0
+FONT_ADR: .long 0x0
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
