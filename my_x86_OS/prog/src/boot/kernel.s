@@ -23,7 +23,54 @@ kernel:
   shl $0x4, %eax # offset
   add %ebx, %eax
   mov %eax, (FONT_ADR)
-  
+
+  push $0x41
+  push $0x010F
+  push $0x0
+  push $0x0
+  call draw_char
+  add $0x10, %sp
+
+
+  push $0x42
+  push $0x010F
+  push $0x0
+  push $0x1
+  call draw_char
+  add $0x10, %sp
+
+  push $0x43
+  push $0x010F
+  push $0x0
+  push $0x2
+  call draw_char
+  add $0x10, %sp
+
+
+  push $0x31
+  push $0x010F
+  push $0x0
+  push $0x0
+  call draw_char
+  add $0x10, %sp
+
+
+  push $0x32
+  push $0x010F
+  push $0x0
+  push $0x1
+  call draw_char
+  add $0x10, %sp
+
+
+  push $0x33
+  push $0x010F
+  push $0x0
+  push $0x2
+  call draw_char
+  add $0x10, %sp
+
+/*  
   # Draw horizontal line(8bit).
   mov $0x7, %ah # set 1bit in RGB plane.
   mov $0x2, %al # map mask register
@@ -79,6 +126,7 @@ kernel:
   mov $0x41, %esi
   shl $0x4, %esi
   add (FONT_ADR), %esi
+
   
   # add offset 1280(oen line)
   mov $0x2, %edi # number of the lines
@@ -91,12 +139,21 @@ kernel:
   movsb
   add $(80 - 1), %edi
   loop .Lkernel_10L
+*/
 
+  push $13
+  push $63
+  call draw_font
+  add $0x8, %sp 
 
   jmp .
 
 
 .align 4
 FONT_ADR: .long 0x0
+
+.include "../modules/protect/vga.s"
+.include "../modules/protect/draw_char.s"
+.include "../modules/protect/draw_font.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0

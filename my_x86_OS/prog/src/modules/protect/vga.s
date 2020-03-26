@@ -9,7 +9,7 @@ vga_set_read_plane:
   mov %esp, %ebp
 
   push %eax
-  push %ebx
+  push %edx
 
   mov 0x8(%ebp), %ah
   and $0x03, %ah
@@ -90,7 +90,7 @@ vram_font_copy:
   # copy 16 dot's font
   cld
 
-  mov $0x16, %ecx
+  mov $0x10, %ecx
 .Lvram_font_copy_10L:
   
   # create font mask
@@ -105,10 +105,9 @@ vram_font_copy:
   test $0x0010, %ebx
   jz .Lvram_font_copy_11F
   and (%edi), %ah
-  jmp, .Lvram_font_copy_11E
+  jmp .Lvram_font_copy_11E
 
 .Lvram_font_copy_11F:
-  and %dh, %ah
   and %dh, %ah
 
 .Lvram_font_copy_11E:
