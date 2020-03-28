@@ -37,158 +37,172 @@ GAS LISTING kernel.s 			page 1
   24 000f 01D8     	  add %ebx, %eax
   25 0011 A3000000 	  mov %eax, (FONT_ADR)
   25      00
-  26              	
-  27 0016 6A41     	  push $0x41
-  28 0018 680F0100 	  push $0x010F
-  28      00
-  29 001d 6A00     	  push $0x0
-  30 001f 6A00     	  push $0x0
-  31 0021 E8030100 	  call draw_char
-  31      00
-  32 0026 6683C410 	  add $0x10, %sp
+  26              	/*
+  27              	  push $0x41
+  28              	  push $0x010F
+  29              	  push $0x0
+  30              	  push $0x0
+  31              	  call draw_char
+  32              	  add $0x10, %sp
   33              	
   34              	
-  35 002a 6A42     	  push $0x42
-  36 002c 680F0100 	  push $0x010F
-  36      00
-  37 0031 6A00     	  push $0x0
-  38 0033 6A01     	  push $0x1
-  39 0035 E8EF0000 	  call draw_char
-  39      00
-  40 003a 6683C410 	  add $0x10, %sp
+  35              	  push $0x42
+  36              	  push $0x010F
+  37              	  push $0x0
+  38              	  push $0x1
+  39              	  call draw_char
+  40              	  add $0x10, %sp
   41              	
-  42 003e 6A43     	  push $0x43
+  42              	  push $0x43
+  43              	  push $0x010F
+  44              	  push $0x0
+  45              	  push $0x2
+  46              	  call draw_char
 GAS LISTING kernel.s 			page 2
 
 
-  43 0040 680F0100 	  push $0x010F
-  43      00
-  44 0045 6A00     	  push $0x0
-  45 0047 6A02     	  push $0x2
-  46 0049 E8DB0000 	  call draw_char
-  46      00
-  47 004e 6683C410 	  add $0x10, %sp
+  47              	  add $0x10, %sp
   48              	
   49              	
-  50 0052 6A31     	  push $0x31
-  51 0054 680F0100 	  push $0x010F
-  51      00
-  52 0059 6A00     	  push $0x0
-  53 005b 6A00     	  push $0x0
-  54 005d E8C70000 	  call draw_char
-  54      00
-  55 0062 6683C410 	  add $0x10, %sp
+  50              	  push $0x31
+  51              	  push $0x010F
+  52              	  push $0x0
+  53              	  push $0x0
+  54              	  call draw_char
+  55              	  add $0x10, %sp
   56              	
   57              	
-  58 0066 6A32     	  push $0x32
-  59 0068 680F0100 	  push $0x010F
-  59      00
-  60 006d 6A00     	  push $0x0
-  61 006f 6A01     	  push $0x1
-  62 0071 E8B30000 	  call draw_char
-  62      00
-  63 0076 6683C410 	  add $0x10, %sp
+  58              	  push $0x32
+  59              	  push $0x010F
+  60              	  push $0x0
+  61              	  push $0x1
+  62              	  call draw_char
+  63              	  add $0x10, %sp
   64              	
   65              	
-  66 007a 6A33     	  push $0x33
-  67 007c 680F0100 	  push $0x010F
-  67      00
-  68 0081 6A00     	  push $0x0
-  69 0083 6A02     	  push $0x2
-  70 0085 E89F0000 	  call draw_char
-  70      00
-  71 008a 6683C410 	  add $0x10, %sp
-  72              	
-  73              	/*  
-  74              	  # Draw horizontal line(8bit).
-  75              	  mov $0x7, %ah # set 1bit in RGB plane.
-  76              	  mov $0x2, %al # map mask register
-  77              	  mov $0x3C4, %dx # sequence control port
-  78              	  out %ax, %dx
-  79              	  
-  80              	  movb $0xFF, (VRAM)
-  81              	  
-  82              	  mov $0x4, %ah
-  83              	  out %ax, %dx
-  84              	
-  85              	  movb $0xFF, (VRAM + 0x1)
-  86              	  
-  87              	  mov $0x2, %ah
-  88              	  out %ax, %dx
-  89              	
-  90              	  movb $0xFF, (VRAM + 0x2)
-  91              	  
+  66              	  push $0x33
+  67              	  push $0x010F
+  68              	  push $0x0
+  69              	  push $0x2
+  70              	  call draw_char
+  71              	  add $0x10, %sp
+  72              	*/
+  73              	
+  74              	/*  
+  75              	  # Draw horizontal line(8bit).
+  76              	  mov $0x7, %ah # set 1bit in RGB plane.
+  77              	  mov $0x2, %al # map mask register
+  78              	  mov $0x3C4, %dx # sequence control port
+  79              	  out %ax, %dx
+  80              	  
+  81              	  movb $0xFF, (VRAM)
+  82              	  
+  83              	  mov $0x4, %ah
+  84              	  out %ax, %dx
+  85              	
+  86              	  movb $0xFF, (VRAM + 0x1)
+  87              	  
+  88              	  mov $0x2, %ah
+  89              	  out %ax, %dx
+  90              	
+  91              	  movb $0xFF, (VRAM + 0x2)
+  92              	  
+  93              	  mov $0x1, %ah
+  94              	  out %ax, %dx
+  95              	
+  96              	  movb $0xFF, (VRAM + 0x3)
+  97              	
+  98              	  # Draw horizontal line is traversed screen.
+  99              	  
+ 100              	  mov $0x02, %ah
+ 101              	  out %ax, %dx
+ 102              	
+ 103              	  lea (VRAM + 80), %edi
 GAS LISTING kernel.s 			page 3
 
 
-  92              	  mov $0x1, %ah
-  93              	  out %ax, %dx
-  94              	
-  95              	  movb $0xFF, (VRAM + 0x3)
-  96              	
-  97              	  # Draw horizontal line is traversed screen.
-  98              	  
-  99              	  mov $0x02, %ah
- 100              	  out %ax, %dx
- 101              	
- 102              	  lea (VRAM + 80), %edi
- 103              	  mov $80, %ecx
- 104              	  mov $0xFF, %al
- 105              	  rep stosb
- 106              	
- 107              	  # Draw 8 bit's rectangle in the 2nd row.
- 108              	  
- 109              	  # add offset 1280(oen line)
- 110              	  mov $0x1, %edi # number of the lines
- 111              	  shl $0x8, %edi # %edi * 256
- 112              	  lea VRAM(%edi, %edi, 0x4), %edi
- 113              	
- 114              	  # x = 640, 80 * 8 bits = 640
- 115              	  movw $0xFF, (80*0)(%edi)
- 116              	  movw $0xFF, (80*1)(%edi)
- 117              	  movw $0xFF, (80*2)(%edi)
- 118              	  movw $0xFF, (80*3)(%edi)
- 119              	  movw $0xFF, (80*4)(%edi)
- 120              	  movw $0xFF, (80*5)(%edi)
- 121              	  movw $0xFF, (80*6)(%edi)
- 122              	  movw $0xFF, (80*7)(%edi)
- 123              	    
- 124              	
- 125              	  # Draw char in the 3rd row.
- 126              	  mov $0x41, %esi
- 127              	  shl $0x4, %esi
- 128              	  add (FONT_ADR), %esi
- 129              	
- 130              	  
- 131              	  # add offset 1280(oen line)
- 132              	  mov $0x2, %edi # number of the lines
- 133              	  shl $0x8, %edi # %edi * 256
- 134              	  lea VRAM(%edi, %edi, 0x4), %edi
- 135              	
- 136              	  mov $0x10, %ecx
- 137              	.Lkernel_10L:
- 138              	
- 139              	  movsb
- 140              	  add $(80 - 1), %edi
- 141              	  loop .Lkernel_10L
- 142              	*/
- 143              	
- 144 008e 6A0D     	  push $13
- 145 0090 6A3F     	  push $63
- 146 0092 E8560100 	  call draw_font
- 146      00
- 147 0097 6683C408 	  add $0x8, %sp 
+ 104              	  mov $80, %ecx
+ 105              	  mov $0xFF, %al
+ 106              	  rep stosb
+ 107              	
+ 108              	  # Draw 8 bit's rectangle in the 2nd row.
+ 109              	  
+ 110              	  # add offset 1280(oen line)
+ 111              	  mov $0x1, %edi # number of the lines
+ 112              	  shl $0x8, %edi # %edi * 256
+ 113              	  lea VRAM(%edi, %edi, 0x4), %edi
+ 114              	
+ 115              	  # x = 640, 80 * 8 bits = 640
+ 116              	  movw $0xFF, (80*0)(%edi)
+ 117              	  movw $0xFF, (80*1)(%edi)
+ 118              	  movw $0xFF, (80*2)(%edi)
+ 119              	  movw $0xFF, (80*3)(%edi)
+ 120              	  movw $0xFF, (80*4)(%edi)
+ 121              	  movw $0xFF, (80*5)(%edi)
+ 122              	  movw $0xFF, (80*6)(%edi)
+ 123              	  movw $0xFF, (80*7)(%edi)
+ 124              	    
+ 125              	
+ 126              	  # Draw char in the 3rd row.
+ 127              	  mov $0x41, %esi
+ 128              	  shl $0x4, %esi
+ 129              	  add (FONT_ADR), %esi
+ 130              	
+ 131              	  
+ 132              	  # add offset 1280(oen line)
+ 133              	  mov $0x2, %edi # number of the lines
+ 134              	  shl $0x8, %edi # %edi * 256
+ 135              	  lea VRAM(%edi, %edi, 0x4), %edi
+ 136              	
+ 137              	  mov $0x10, %ecx
+ 138              	.Lkernel_10L:
+ 139              	
+ 140              	  movsb
+ 141              	  add $(80 - 1), %edi
+ 142              	  loop .Lkernel_10L
+ 143              	*/
+ 144              	
+ 145              	
+ 146              	
+ 147 0016 6A0D     	  push $13
+ 148 0018 6A3F     	  push $63
+ 149 001a E8860100 	  call draw_font
+ 149      00
+ 150 001f 6683C408 	  add $0x8, %sp 
+ 151              	
+ 152              	
+ 153 0023 68000000 	  push $.Lkernel_s0
+ 153      00
+ 154 0028 680F0100 	  push $0x010F
+ 154      00
+ 155 002d 6A0E     	  push $14
+ 156 002f 6A19     	  push $0x19
+ 157 0031 E8B40100 	  call draw_str
 GAS LISTING kernel.s 			page 4
 
 
- 148              	
- 149 009b EBFE     	  jmp .
- 150              	
- 151              	
- 152 009d 0F1F00   	.align 4
- 153 00a0 00000000 	FONT_ADR: .long 0x0
- 154              	
- 155              	.include "../modules/protect/vga.s"
+ 157      00
+ 158 0036 6683C410 	  add $0x10, %sp
+ 159              	
+ 160 003a 6A04     	  push $0x4
+ 161 003c 6A3F     	  push $63
+ 162 003e E8F00100 	  call draw_color_bar
+ 162      00
+ 163 0043 6683C408 	  add $0x8, %sp
+ 164              	
+ 165 0047 EBFE     	  jmp .
+ 166              	
+ 167              	
+ 168 0049 48656C6C 	.Lkernel_s0: .string "Hello, kernel!"
+ 168      6F2C206B 
+ 168      65726E65 
+ 168      6C2100
+ 169              	
+ 170              	.align 4
+ 171 0058 00000000 	FONT_ADR: .long 0x0
+ 172              	
+ 173              	
+ 174              	.include "../modules/protect/vga.s"
    1              	/*
    2              	 *  vga_set_read_plane(plane)
    3              	 *  arguments:
@@ -196,25 +210,25 @@ GAS LISTING kernel.s 			page 1
    5              	 *  return: void
    6              	 */
    7              	vga_set_read_plane:
-   8 00a4 55       	  push %ebp
-   9 00a5 89E5     	  mov %esp, %ebp
+   8 005c 55       	  push %ebp
+   9 005d 89E5     	  mov %esp, %ebp
   10              	
-  11 00a7 50       	  push %eax
-  12 00a8 52       	  push %edx
+  11 005f 50       	  push %eax
+  12 0060 52       	  push %edx
   13              	
-  14 00a9 8A6508   	  mov 0x8(%ebp), %ah
-  15 00ac 80E403   	  and $0x03, %ah
-  16 00af B004     	  mov $0x04, %al
-  17 00b1 66BACE03 	  mov $0x03CE, %dx
-  18 00b5 66EF     	  out %ax, %dx
+  14 0061 8A6508   	  mov 0x8(%ebp), %ah
+  15 0064 80E403   	  and $0x03, %ah
+  16 0067 B004     	  mov $0x04, %al
+  17 0069 66BACE03 	  mov $0x03CE, %dx
+  18 006d 66EF     	  out %ax, %dx
   19              	
-  20 00b7 5A       	  pop %edx
-  21 00b8 58       	  pop %eax
+  20 006f 5A       	  pop %edx
+  21 0070 58       	  pop %eax
   22              	
-  23 00b9 89EC     	  mov %ebp, %esp
-  24 00bb 5D       	  pop %ebp
+  23 0071 89EC     	  mov %ebp, %esp
+  24 0073 5D       	  pop %ebp
   25              	
-  26 00bc C3       	  ret
+  26 0074 C3       	  ret
   27              	
   28              	
   29              	/*
@@ -224,28 +238,28 @@ GAS LISTING kernel.s 			page 1
   33              	 * return: void
   34              	 */
   35              	
-  36              	vga_set_write_plane:
-  37 00bd 55       	  push %ebp
-  38 00be 89E5     	  mov %esp, %ebp
-  39              	
-  40 00c0 50       	  push %eax
-  41 00c1 52       	  push %edx
-  42              	
-  43 00c2 8A6508   	  mov 0x8(%ebp), %ah
-  44 00c5 80E40F   	  and $0xF, %ah
-  45 00c8 B002     	  mov $0x2, %al
-  46 00ca 66BAC403 	  mov $0x03C4, %dx
-  47 00ce 66EF     	  out %ax, %dx
-  48              	  
-  49 00d0 5A       	  pop %edx
 GAS LISTING kernel.s 			page 5
 
 
-  50 00d1 58       	  pop %eax
+  36              	vga_set_write_plane:
+  37 0075 55       	  push %ebp
+  38 0076 89E5     	  mov %esp, %ebp
+  39              	
+  40 0078 50       	  push %eax
+  41 0079 52       	  push %edx
+  42              	
+  43 007a 8A6508   	  mov 0x8(%ebp), %ah
+  44 007d 80E40F   	  and $0xF, %ah
+  45 0080 B002     	  mov $0x2, %al
+  46 0082 66BAC403 	  mov $0x03C4, %dx
+  47 0086 66EF     	  out %ax, %dx
+  48              	  
+  49 0088 5A       	  pop %edx
+  50 0089 58       	  pop %eax
   51              	
-  52 00d2 89EC     	  mov %ebp, %esp
-  53 00d4 5D       	  pop %ebp
-  54 00d5 C3       	  ret
+  52 008a 89EC     	  mov %ebp, %esp
+  53 008c 5D       	  pop %ebp
+  54 008d C3       	  ret
   55              	
   56              	/*
   57              	 * vram_font_copy(font, vram, plane, color)
@@ -258,83 +272,83 @@ GAS LISTING kernel.s 			page 1
   64              	 */
   65              	
   66              	vram_font_copy:
-  67 00d6 55       	  push %ebp
-  68 00d7 89E5     	  mov %esp, %ebp
+  67 008e 55       	  push %ebp
+  68 008f 89E5     	  mov %esp, %ebp
   69              	
-  70 00d9 50       	  push %eax
-  71 00da 53       	  push %ebx
-  72 00db 51       	  push %ecx
-  73 00dc 52       	  push %edx
-  74 00dd 56       	  push %esi
-  75 00de 57       	  push %edi
+  70 0091 50       	  push %eax
+  71 0092 53       	  push %ebx
+  72 0093 51       	  push %ecx
+  73 0094 52       	  push %edx
+  74 0095 56       	  push %esi
+  75 0096 57       	  push %edi
   76              	
-  77 00df 8B7508   	  mov 0x8(%ebp), %esi # font
-  78 00e2 8B7D0C   	  mov 0xc(%ebp), %edi # vram
-  79 00e5 0FB64510 	  movzxb 0x10(%ebp), %eax # plane
-  80 00e9 0FB75D14 	  movzxw 0x14(%ebp), %ebx # color
+  77 0097 8B7508   	  mov 0x8(%ebp), %esi # font
+  78 009a 8B7D0C   	  mov 0xc(%ebp), %edi # vram
+  79 009d 0FB64510 	  movzxb 0x10(%ebp), %eax # plane
+  80 00a1 0FB75D14 	  movzxw 0x14(%ebp), %ebx # color
   81              	
-  82 00ed 84C7     	  test %al, %bh
-  83 00ef 0F94C6   	  setz %dh
-  84 00f2 FECE     	  dec %dh
+  82 00a5 84C7     	  test %al, %bh
+  83 00a7 0F94C6   	  setz %dh
+  84 00aa FECE     	  dec %dh
   85              	
-  86 00f4 84C3     	  test %al, %bl
-  87 00f6 0F94C2   	  setz %dl
-  88 00f9 FECA     	  dec %dl
+  86 00ac 84C3     	  test %al, %bl
+  87 00ae 0F94C2   	  setz %dl
+  88 00b1 FECA     	  dec %dl
   89              	
   90              	  # copy 16 dot's font
-  91 00fb FC       	  cld
+  91 00b3 FC       	  cld
   92              	
-  93 00fc B9100000 	  mov $0x10, %ecx
+GAS LISTING kernel.s 			page 6
+
+
+  93 00b4 B9100000 	  mov $0x10, %ecx
   93      00
   94              	.Lvram_font_copy_10L:
   95              	  
   96              	  # create font mask
-  97 0101 AC       	  lodsb
-  98 0102 88C4     	  mov %al, %ah
-  99 0104 F6D4     	  not %ah
+  97 00b9 AC       	  lodsb
+  98 00ba 88C4     	  mov %al, %ah
+  99 00bc F6D4     	  not %ah
  100              	  
  101              	  # front color(font color)
- 102 0106 20D0     	  and %dl, %al
+ 102 00be 20D0     	  and %dl, %al
  103              	
  104              	  # background color
- 105 0108 F7C31000 	  test $0x0010, %ebx
-GAS LISTING kernel.s 			page 6
-
-
+ 105 00c0 F7C31000 	  test $0x0010, %ebx
  105      0000
- 106 010e 7404     	  jz .Lvram_font_copy_11F
- 107 0110 2227     	  and (%edi), %ah
- 108 0112 EB02     	  jmp .Lvram_font_copy_11E
+ 106 00c6 7404     	  jz .Lvram_font_copy_11F
+ 107 00c8 2227     	  and (%edi), %ah
+ 108 00ca EB02     	  jmp .Lvram_font_copy_11E
  109              	
  110              	.Lvram_font_copy_11F:
- 111 0114 20F4     	  and %dh, %ah
+ 111 00cc 20F4     	  and %dh, %ah
  112              	
  113              	.Lvram_font_copy_11E:
  114              	
  115              	  # merge front and background color
- 116 0116 08E0     	  or %ah, %al
+ 116 00ce 08E0     	  or %ah, %al
  117              	
- 118 0118 8807     	  mov %al, (%edi)
+ 118 00d0 8807     	  mov %al, (%edi)
  119              	  
- 120 011a 83C750   	  add $80, %edi
- 121 011d E2E2     	  loop .Lvram_font_copy_10L
+ 120 00d2 83C750   	  add $80, %edi
+ 121 00d5 E2E2     	  loop .Lvram_font_copy_10L
  122              	
  123              	.Lvram_font_copy_10E:
  124              	
- 125 011f 5F       	  pop %edi
- 126 0120 5E       	  pop %esi
- 127 0121 5A       	  pop %edx
- 128 0122 59       	  pop %ecx
- 129 0123 5B       	  pop %ebx
- 130 0124 58       	  pop %eax
+ 125 00d7 5F       	  pop %edi
+ 126 00d8 5E       	  pop %esi
+ 127 00d9 5A       	  pop %edx
+ 128 00da 59       	  pop %ecx
+ 129 00db 5B       	  pop %ebx
+ 130 00dc 58       	  pop %eax
  131              	
- 132 0125 89EC     	  mov %ebp, %esp
- 133 0127 5D       	  pop %ebp
+ 132 00dd 89EC     	  mov %ebp, %esp
+ 133 00df 5D       	  pop %ebp
  134              	
- 135 0128 C3       	  ret
+ 135 00e0 C3       	  ret
  136              	
  137              	
- 156              	.include "../modules/protect/draw_char.s"
+ 175              	.include "../modules/protect/draw_char.s"
    1              	/*
    2              	 *  draw_char(col, row, color, ch)
    3              	 *  arguments:
@@ -344,127 +358,130 @@ GAS LISTING kernel.s 			page 1
    7              	 *    ch : char
    8              	 *  return : null
    9              	 */
+GAS LISTING kernel.s 			page 7
+
+
   10              	
   11              	.include "./define.s"
   12              	
   13              	draw_char:
-  14 0129 55       	  push %ebp
-  15 012a 89E5     	  mov %esp, %ebp
+  14 00e1 55       	  push %ebp
+  15 00e2 89E5     	  mov %esp, %ebp
   16              	
-  17 012c 50       	  push %eax
-  18 012d 53       	  push %ebx
-  19 012e 51       	  push %ecx
-  20 012f 52       	  push %edx
-  21 0130 56       	  push %esi
-  22 0131 57       	  push %edi
+  17 00e4 50       	  push %eax
+  18 00e5 53       	  push %ebx
+  19 00e6 51       	  push %ecx
+  20 00e7 52       	  push %edx
+  21 00e8 56       	  push %esi
+  22 00e9 57       	  push %edi
   23              	
-GAS LISTING kernel.s 			page 7
-
-
   24              	  # get font addr
-  25 0132 0FB67514 	  movzxb 0x14(%ebp), %esi # font addr
-  26 0136 C1E604   	  shl $0x4, %esi
-  27 0139 03350000 	  add (FONT_ADR), %esi
+  25 00ea 0FB67514 	  movzxb 0x14(%ebp), %esi # font addr
+  26 00ee C1E604   	  shl $0x4, %esi
+  27 00f1 03350000 	  add (FONT_ADR), %esi
   27      0000
   28              	
-  29 013f 8B7D0C   	  mov 0xc(%ebp), %edi # row
-  30 0142 C1E708   	  shl $0x8, %edi
-  31 0145 8DBCBF00 	  lea VRAM(%edi, %edi, 0x4), %edi
+  29 00f7 8B7D0C   	  mov 0xc(%ebp), %edi # row
+  30 00fa C1E708   	  shl $0x8, %edi
+  31 00fd 8DBCBF00 	  lea VRAM(%edi, %edi, 0x4), %edi
   31      000A00
-  32 014c 037D08   	  add 0x8(%ebp), %edi # col
+  32 0104 037D08   	  add 0x8(%ebp), %edi # col
   33              	  
   34              	  # put char
-  35 014f 0FB75D10 	  movzxw 0x10(%ebp), %ebx # color
+  35 0107 0FB75D10 	  movzxw 0x10(%ebp), %ebx # color
   36              	 
-  37 0153 6A03     	  push $0x03
-  38 0155 E84AFFFF 	  call vga_set_read_plane
+  37 010b 6A03     	  push $0x03
+  38 010d E84AFFFF 	  call vga_set_read_plane
   38      FF
-  39 015a 6683C404 	  add $0x4, %sp
+  39 0112 6683C404 	  add $0x4, %sp
   40              	  
-  41 015e 6A08     	  push $0x08
-  42 0160 E858FFFF 	  call vga_set_write_plane
+  41 0116 6A08     	  push $0x08
+  42 0118 E858FFFF 	  call vga_set_write_plane
   42      FF
-  43 0165 6683C404 	  add $0x4, %sp
+  43 011d 6683C404 	  add $0x4, %sp
   44              	
-  45 0169 53       	  push %ebx
-  46 016a 6A08     	  push $0x08
-  47 016c 57       	  push %edi
-  48 016d 56       	  push %esi
-  49 016e E863FFFF 	  call vram_font_copy
+  45 0121 53       	  push %ebx
+  46 0122 6A08     	  push $0x08
+  47 0124 57       	  push %edi
+  48 0125 56       	  push %esi
+  49 0126 E863FFFF 	  call vram_font_copy
   49      FF
-  50 0173 6683C410 	  add $0x10, %sp
+  50 012b 6683C410 	  add $0x10, %sp
   51              	
   52              	  
-  53 0177 6A02     	  push $0x02
-  54 0179 E826FFFF 	  call vga_set_read_plane
+  53 012f 6A02     	  push $0x02
+  54 0131 E826FFFF 	  call vga_set_read_plane
   54      FF
-  55 017e 6683C404 	  add $0x4, %sp
+  55 0136 6683C404 	  add $0x4, %sp
   56              	  
-  57 0182 6A04     	  push $0x04
-  58 0184 E834FFFF 	  call vga_set_write_plane
+  57 013a 6A04     	  push $0x04
+  58 013c E834FFFF 	  call vga_set_write_plane
   58      FF
-  59 0189 6683C404 	  add $0x4, %sp
-  60              	
-  61 018d 53       	  push %ebx
-  62 018e 6A04     	  push $0x04
-  63 0190 57       	  push %edi
-  64 0191 56       	  push %esi
-  65 0192 E83FFFFF 	  call vram_font_copy
-  65      FF
-  66 0197 6683C410 	  add $0x10, %sp
-  67              	
-  68              	
-  69 019b 6A01     	  push $0x01
-  70 019d E802FFFF 	  call vga_set_read_plane
-  70      FF
-  71 01a2 6683C404 	  add $0x4, %sp
+  59 0141 6683C404 	  add $0x4, %sp
 GAS LISTING kernel.s 			page 8
 
 
+  60              	
+  61 0145 53       	  push %ebx
+  62 0146 6A04     	  push $0x04
+  63 0148 57       	  push %edi
+  64 0149 56       	  push %esi
+  65 014a E83FFFFF 	  call vram_font_copy
+  65      FF
+  66 014f 6683C410 	  add $0x10, %sp
+  67              	
+  68              	
+  69 0153 6A01     	  push $0x01
+  70 0155 E802FFFF 	  call vga_set_read_plane
+  70      FF
+  71 015a 6683C404 	  add $0x4, %sp
   72              	  
-  73 01a6 6A02     	  push $0x02
-  74 01a8 E810FFFF 	  call vga_set_write_plane
+  73 015e 6A02     	  push $0x02
+  74 0160 E810FFFF 	  call vga_set_write_plane
   74      FF
-  75 01ad 6683C404 	  add $0x4, %sp
+  75 0165 6683C404 	  add $0x4, %sp
   76              	
-  77 01b1 53       	  push %ebx
-  78 01b2 6A02     	  push $0x02
-  79 01b4 57       	  push %edi
-  80 01b5 56       	  push %esi
-  81 01b6 E81BFFFF 	  call vram_font_copy
+  77 0169 53       	  push %ebx
+  78 016a 6A02     	  push $0x02
+  79 016c 57       	  push %edi
+  80 016d 56       	  push %esi
+  81 016e E81BFFFF 	  call vram_font_copy
   81      FF
-  82 01bb 6683C410 	  add $0x10, %sp
+  82 0173 6683C410 	  add $0x10, %sp
   83              	
-  84 01bf 6A00     	  push $0x00
-  85 01c1 E8DEFEFF 	  call vga_set_read_plane
+  84 0177 6A00     	  push $0x00
+  85 0179 E8DEFEFF 	  call vga_set_read_plane
   85      FF
-  86 01c6 6683C404 	  add $0x4, %sp
+  86 017e 6683C404 	  add $0x4, %sp
   87              	  
-  88 01ca 6A01     	  push $0x01
-  89 01cc E8ECFEFF 	  call vga_set_write_plane
+  88 0182 6A01     	  push $0x01
+  89 0184 E8ECFEFF 	  call vga_set_write_plane
   89      FF
-  90 01d1 6683C404 	  add $0x4, %sp
+  90 0189 6683C404 	  add $0x4, %sp
   91              	
-  92 01d5 53       	  push %ebx
-  93 01d6 6A01     	  push $0x01
-  94 01d8 57       	  push %edi
-  95 01d9 56       	  push %esi
-  96 01da E8F7FEFF 	  call vram_font_copy
+  92 018d 53       	  push %ebx
+  93 018e 6A01     	  push $0x01
+  94 0190 57       	  push %edi
+  95 0191 56       	  push %esi
+  96 0192 E8F7FEFF 	  call vram_font_copy
   96      FF
-  97 01df 6683C410 	  add $0x10, %sp
+  97 0197 6683C410 	  add $0x10, %sp
   98              	
-  99 01e3 5F       	  pop %edi
- 100 01e4 5E       	  pop %esi
- 101 01e5 5A       	  pop %edx
- 102 01e6 59       	  pop %ecx
- 103 01e7 5B       	  pop %ebx
- 104 01e8 58       	  pop %eax
+  99 019b 5F       	  pop %edi
+ 100 019c 5E       	  pop %esi
+ 101 019d 5A       	  pop %edx
+ 102 019e 59       	  pop %ecx
+ 103 019f 5B       	  pop %ebx
+ 104 01a0 58       	  pop %eax
  105              	
- 106 01e9 89EC     	  mov %ebp, %esp
- 107 01eb 5D       	  pop %ebp
+ 106 01a1 89EC     	  mov %ebp, %esp
+ 107 01a3 5D       	  pop %ebp
  108              	
- 109 01ec C3       	  ret
- 157              	.include "../modules/protect/draw_font.s"
+ 109 01a4 C3       	  ret
+GAS LISTING kernel.s 			page 9
+
+
+ 176              	.include "../modules/protect/draw_font.s"
    1              	/*
    2              	 *  draw_font(col, row)
    3              	 *  arguments:
@@ -474,67 +491,224 @@ GAS LISTING kernel.s 			page 1
    7              	 */
    8              	
    9              	draw_font:
-  10 01ed 55       	  push %ebp
-  11 01ee 89E5     	  mov %esp, %ebp
+  10 01a5 55       	  push %ebp
+  11 01a6 89E5     	  mov %esp, %ebp
   12              	
-  13 01f0 50       	  push %eax
-GAS LISTING kernel.s 			page 9
-
-
-  14 01f1 53       	  push %ebx
-  15 01f2 51       	  push %ecx
-  16 01f3 52       	  push %edx
-  17 01f4 56       	  push %esi
-  18 01f5 57       	  push %edi
+  13 01a8 50       	  push %eax
+  14 01a9 53       	  push %ebx
+  15 01aa 51       	  push %ecx
+  16 01ab 52       	  push %edx
+  17 01ac 56       	  push %esi
+  18 01ad 57       	  push %edi
   19              	
-  20 01f6 8B7508   	  mov 0x8(%ebp), %esi # col
-  21 01f9 8B7D0C   	  mov 0xc(%ebp), %edi # row
+  20 01ae 8B7508   	  mov 0x8(%ebp), %esi # col
+  21 01b1 8B7D0C   	  mov 0xc(%ebp), %edi # row
   22              	
-  23 01fc B9000000 	  mov $0x0, %ecx
+  23 01b4 B9000000 	  mov $0x0, %ecx
   23      00
   24              	.Ldraw_font_10L:  
-  25 0201 81F90001 	  cmp $0x100, %ecx
+  25 01b9 81F90001 	  cmp $0x100, %ecx
   25      0000
-  26 0207 731F     	  jae .Ldraw_font_10E
+  26 01bf 731F     	  jae .Ldraw_font_10E
   27              	
-  28 0209 89C8     	  mov %ecx, %eax
-  29 020b 83E00F   	  and $0x0F, %eax
-  30 020e 01F0     	  add %esi, %eax
+  28 01c1 89C8     	  mov %ecx, %eax
+  29 01c3 83E00F   	  and $0x0F, %eax
+  30 01c6 01F0     	  add %esi, %eax
   31              	
-  32 0210 89CB     	  mov %ecx, %ebx
-  33 0212 C1EB04   	  shr $0x4, %ebx
-  34 0215 01FB     	  add %edi, %ebx
+  32 01c8 89CB     	  mov %ecx, %ebx
+  33 01ca C1EB04   	  shr $0x4, %ebx
+  34 01cd 01FB     	  add %edi, %ebx
   35              	
-  36 0217 51       	  push %ecx
-  37 0218 6A07     	  push $0x07
-  38 021a 53       	  push %ebx
-  39 021b 50       	  push %eax
-  40 021c E808FFFF 	  call draw_char
+  36 01cf 51       	  push %ecx
+  37 01d0 6A07     	  push $0x07
+  38 01d2 53       	  push %ebx
+  39 01d3 50       	  push %eax
+  40 01d4 E808FFFF 	  call draw_char
   40      FF
-  41 0221 6683C410 	  add $0x10, %sp
+  41 01d9 6683C410 	  add $0x10, %sp
   42              	
-  43 0225 41       	  inc %ecx
-  44 0226 EBD9     	  jmp .Ldraw_font_10L
+  43 01dd 41       	  inc %ecx
+  44 01de EBD9     	  jmp .Ldraw_font_10L
   45              	.Ldraw_font_10E:
   46              	
-  47 0228 5F       	  pop %edi
-  48 0229 5E       	  pop %esi
-  49 022a 5A       	  pop %edx
-  50 022b 59       	  pop %ecx
-  51 022c 5B       	  pop %ebx
-  52 022d 58       	  pop %eax
+  47 01e0 5F       	  pop %edi
+  48 01e1 5E       	  pop %esi
+  49 01e2 5A       	  pop %edx
+  50 01e3 59       	  pop %ecx
+  51 01e4 5B       	  pop %ebx
+  52 01e5 58       	  pop %eax
   53              	
-  54 022e 89EC     	  mov %ebp, %esp
-  55 0230 5D       	  pop %ebp
-  56              	
-  57 0231 C3       	  ret
- 158              	
- 159 0232 00000000 	.fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
- 159      00000000 
- 159      00000000 
- 159      00000000 
- 159      00000000 
 GAS LISTING kernel.s 			page 10
+
+
+  54 01e6 89EC     	  mov %ebp, %esp
+  55 01e8 5D       	  pop %ebp
+  56              	
+  57 01e9 C3       	  ret
+ 177              	.include "../modules/protect/draw_str.s"
+   1              	/*
+   2              	 *  draw_str(col, row, color, p)
+   3              	 *  arguments:
+   4              	 *    col
+   5              	 *    row:
+   6              	 *    color: drawing color
+   7              	 *    str's addr
+   8              	 */
+   9              	
+  10              	draw_str:
+  11 01ea 55       	  push %ebp
+  12 01eb 89E5     	  mov %esp, %ebp
+  13              	
+  14 01ed 50       	  push %eax
+  15 01ee 53       	  push %ebx
+  16 01ef 51       	  push %ecx
+  17 01f0 52       	  push %edx
+  18 01f1 56       	  push %esi
+  19              	
+  20 01f2 8B4D08   	  mov 0x8(%ebp), %ecx
+  21 01f5 8B550C   	  mov 0xc(%ebp), %edx
+  22 01f8 0FB75D10 	  movzxw 0x10(%ebp), %ebx
+  23 01fc 8B7514   	  mov 0x14(%ebp), %esi
+  24              	
+  25 01ff FC       	  cld
+  26              	.Ldraw_str_10L:
+  27              	
+  28 0200 AC       	  lodsb
+  29 0201 3C00     	  cmp $0x0, %al
+  30 0203 7425     	  je .Ldraw_str_10E
+  31              	
+  32 0205 50       	  push %eax
+  33 0206 53       	  push %ebx
+  34 0207 52       	  push %edx
+  35 0208 51       	  push %ecx
+  36 0209 E8D3FEFF 	  call draw_char
+  36      FF
+  37 020e 6683C410 	  add $0x10, %sp
+  38              	
+  39              	
+  40              	
+  41 0212 41       	  inc %ecx
+  42 0213 83F950   	  cmp $80, %ecx
+  43 0216 7C10     	  jl .Ldraw_str_12E
+  44 0218 B9000000 	  mov $0, %ecx
+  44      00
+  45 021d 42       	  inc %edx
+  46 021e 83FA1E   	  cmp $30, %edx
+  47 0221 7C05     	  jl .Ldraw_str_12E
+  48 0223 BA000000 	  mov $0, %edx
+  48      00
+  49              	
+GAS LISTING kernel.s 			page 11
+
+
+  50              	.Ldraw_str_12E:
+  51 0228 EBD6     	  jmp .Ldraw_str_10L
+  52              	
+  53              	.Ldraw_str_10E:
+  54              	
+  55 022a 5E       	  pop %esi
+  56 022b 5A       	  pop %edx
+  57 022c 59       	  pop %ecx
+  58 022d 5B       	  pop %ebx
+  59 022e 58       	  pop %eax
+  60              	
+  61 022f 89EC     	  mov %ebp, %esp
+  62 0231 5D       	  pop %ebp
+  63              	
+  64 0232 C3       	  ret
+  65              	
+ 178              	.include "../modules/protect/draw_color_bar.s"
+   1              	/*
+   2              	 *  draw_color_bar(row, col)
+   3              	 *  arguments:
+   4              	 *    row:
+   5              	 *    col:
+   6              	 *  reuturn: void
+   7              	 */
+   8              	
+   9              	draw_color_bar:
+  10 0233 55       	  push %ebp
+  11 0234 89E5     	  mov %esp, %ebp
+  12              	
+  13 0236 50       	  push %eax
+  14 0237 53       	  push %ebx
+  15 0238 51       	  push %ecx
+  16 0239 52       	  push %edx
+  17 023a 56       	  push %esi
+  18 023b 57       	  push %edi
+  19              	
+  20 023c 8B7508   	  mov 0x8(%ebp), %esi #row
+  21 023f 8B7D0C   	  mov 0xc(%ebp), %edi #col
+  22              	
+  23 0242 B9000000 	  mov $0x0, %ecx
+  23      00
+  24              	.Ldraw_color_bar_10L:
+  25 0247 83F910   	  cmp $0x10, %ecx
+  26 024a 732E     	  jae .Ldraw_color_bar_10E
+  27              	
+  28 024c 89C8     	  mov %ecx, %eax
+  29 024e 83E001   	  and $0x01, %eax
+  30 0251 C1E003   	  shl $0x3, %eax
+  31 0254 01F0     	  add %esi, %eax
+  32              	
+  33 0256 89CB     	  mov %ecx, %ebx
+  34 0258 D1EB     	  shr $0x1, %ebx
+  35 025a 01FB     	  add %edi, %ebx
+  36              	
+  37 025c 89CA     	  mov %ecx, %edx
+  38 025e D1E2     	  shl $0x1, %edx
+  39 0260 8B920000 	  mov .Ldraw_color_bar_t0(%edx), %edx
+GAS LISTING kernel.s 			page 12
+
+
+  39      0000
+  40              	
+  41 0266 68000000 	  push $.Ldraw_color_bar_s0
+  41      00
+  42 026b 52       	  push %edx
+  43 026c 53       	  push %ebx
+  44 026d 50       	  push %eax
+  45 026e E877FFFF 	  call draw_str
+  45      FF
+  46 0273 6683C410 	  add $0x10, %sp
+  47              	
+  48 0277 41       	  inc %ecx
+  49 0278 EBCD     	  jmp .Ldraw_color_bar_10L
+  50              	
+  51              	.Ldraw_color_bar_10E:
+  52              	  
+  53 027a 5F       	  pop %edi
+  54 027b 5E       	  pop %esi
+  55 027c 5A       	  pop %edx
+  56 027d 59       	  pop %ecx
+  57 027e 5B       	  pop %ebx
+  58 027f 58       	  pop %eax
+  59              	
+  60 0280 89EC     	  mov %ebp, %esp
+  61 0282 5D       	  pop %ebp
+  62              	
+  63 0283 C3       	  ret
+  64              	
+  65 0284 20202020 	.Ldraw_color_bar_s0: .string "        "
+  65      20202020 
+  65      00
+  66              	
+  67 028d 00000008 	.Ldraw_color_bar_t0: .word 0x0000, 0x0800 
+  68 0291 00010009 	.word 0x0100, 0x0900
+  69 0295 0002000A 	.word 0x0200, 0x0A00
+  70 0299 0003000B 	.word 0x0300, 0x0B00
+  71 029d 0004000C 	.word 0x0400, 0x0C00
+  72 02a1 0005000D 	.word 0x0500, 0x0D00
+  73 02a5 0006000E 	.word 0x0600, 0x0E00
+  74 02a9 0007000F 	.word 0x0700, 0x0F00
+ 179              	
+ 180              	
+ 181 02ad 00000000 	.fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
+ 181      00000000 
+ 181      00000000 
+ 181      00000000 
+ 181      00000000 
+GAS LISTING kernel.s 			page 13
 
 
 DEFINED SYMBOLS
@@ -548,11 +722,13 @@ DEFINED SYMBOLS
           ./define.s:8      *ABS*:00000000000a0000 VRAM
           ./define.s:9      *ABS*:0000000000101000 KERNEL_LOAD
             kernel.s:7      .text:0000000000000000 kernel
-            kernel.s:153    .text:00000000000000a0 FONT_ADR
-../modules/protect/draw_char.s:13     .text:0000000000000129 draw_char
-../modules/protect/draw_font.s:9      .text:00000000000001ed draw_font
-../modules/protect/vga.s:7      .text:00000000000000a4 vga_set_read_plane
-../modules/protect/vga.s:36     .text:00000000000000bd vga_set_write_plane
-../modules/protect/vga.s:66     .text:00000000000000d6 vram_font_copy
+            kernel.s:171    .text:0000000000000058 FONT_ADR
+../modules/protect/draw_font.s:9      .text:00000000000001a5 draw_font
+../modules/protect/draw_str.s:10     .text:00000000000001ea draw_str
+../modules/protect/draw_color_bar.s:9      .text:0000000000000233 draw_color_bar
+../modules/protect/vga.s:7      .text:000000000000005c vga_set_read_plane
+../modules/protect/vga.s:36     .text:0000000000000075 vga_set_write_plane
+../modules/protect/vga.s:66     .text:000000000000008e vram_font_copy
+../modules/protect/draw_char.s:13     .text:00000000000000e1 draw_char
 
 NO UNDEFINED SYMBOLS

@@ -23,7 +23,7 @@ kernel:
   shl $0x4, %eax # offset
   add %ebx, %eax
   mov %eax, (FONT_ADR)
-
+/*
   push $0x41
   push $0x010F
   push $0x0
@@ -69,6 +69,7 @@ kernel:
   push $0x2
   call draw_char
   add $0x10, %sp
+*/
 
 /*  
   # Draw horizontal line(8bit).
@@ -141,19 +142,40 @@ kernel:
   loop .Lkernel_10L
 */
 
+
+
   push $13
   push $63
   call draw_font
   add $0x8, %sp 
 
+
+  push $.Lkernel_s0
+  push $0x010F
+  push $14
+  push $0x19
+  call draw_str
+  add $0x10, %sp
+
+  push $0x4
+  push $63
+  call draw_color_bar
+  add $0x8, %sp
+
   jmp .
 
+
+.Lkernel_s0: .string "Hello, kernel!"
 
 .align 4
 FONT_ADR: .long 0x0
 
+
 .include "../modules/protect/vga.s"
 .include "../modules/protect/draw_char.s"
 .include "../modules/protect/draw_font.s"
+.include "../modules/protect/draw_str.s"
+.include "../modules/protect/draw_color_bar.s"
+
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
