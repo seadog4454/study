@@ -162,6 +162,103 @@ kernel:
   call draw_color_bar
   add $0x8, %sp
 
+
+  push $0x01
+  push $0x4
+  push $0x8
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x01
+  push $0x5
+  push $0x9
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x02
+  push $0x6
+  push $0xa
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x02
+  push $0x7
+  push $0xb
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x03
+  push $0x8
+  push $0xc
+  call draw_pixel
+  add $0xc, %sp
+  
+  push $0x03
+  push $0x9
+  push $0xd
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x04
+  push $0xa
+  push $0xe
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x04
+  push $0xb
+  push $0xf
+  call draw_pixel
+  add $0xc, %sp
+  
+  push $0x03
+  push $0x4
+  push $0xf
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x03
+  push $0x5
+  push $0xe
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x04
+  push $0x6
+  push $0xd
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x04
+  push $0x7
+  push $0xc
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x01
+  push $0x8
+  push $0xb
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x01
+  push $0x9
+  push $0xa
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x02
+  push $0xa
+  push $0x9
+  call draw_pixel
+  add $0xc, %sp
+
+  push $0x02
+  push $0xb
+  push $0x8
+  call draw_pixel
+  add $0xc, %sp
+
   jmp .
 
 
@@ -176,6 +273,6 @@ FONT_ADR: .long 0x0
 .include "../modules/protect/draw_font.s"
 .include "../modules/protect/draw_str.s"
 .include "../modules/protect/draw_color_bar.s"
-
+.include "../modules/protect/draw_pixel.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0

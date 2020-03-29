@@ -135,3 +135,50 @@ vram_font_copy:
   ret
 
 
+
+
+
+/*
+ *  vram_bit_copy(bit, vram, plane, color)
+ *  arguments:
+ *    bit:  bit pattern
+ *    vram: vram addr
+ *    plane:
+ *    color:
+ *
+ */
+
+vram_bit_copy:
+  push %ebp
+  mov %esp, %ebp
+
+  push %eax
+  push %ebx
+  push %edi
+
+  mov 0xc(%ebp), %edi # vram addr
+  movzxb 0x10(%ebp), %eax # plane
+  movzxw 0x14(%ebp), %ebx # color
+
+  test %al, %bl
+  setz %bl
+  dec %bl
+
+  mov 0x8(%ebp), %al
+  mov %al, %ah
+  not %ah
+
+  and (%edi), %ah
+  and %bl, %al
+  or %ah, %al
+  
+  mov %al, (%edi)
+
+  pop %edi
+  pop %ebx
+  pop %eax
+
+  mov %ebp, %esp
+  pop %ebp
+  
+  ret
