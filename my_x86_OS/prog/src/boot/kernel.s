@@ -162,7 +162,7 @@ kernel:
   call draw_color_bar
   add $0x8, %sp
 
-
+/*
   push $0x01
   push $0x4
   push $0x8
@@ -258,9 +258,24 @@ kernel:
   push $0x8
   call draw_pixel
   add $0xc, %sp
+*/
+  push $0x0F
+  push $0x0
+  push $0x0 
+  push $100
+  push $100
+  call draw_line
+  add $0x14, %sp 
+
+  push $0x3
+  push $200
+  push $200
+  push $100
+  push $100
+  call draw_rect
+  add $0x14, %sp
 
   jmp .
-
 
 .Lkernel_s0: .string "Hello, kernel!"
 
@@ -274,5 +289,7 @@ FONT_ADR: .long 0x0
 .include "../modules/protect/draw_str.s"
 .include "../modules/protect/draw_color_bar.s"
 .include "../modules/protect/draw_pixel.s"
+.include "../modules/protect/draw_line.s"
+.include "../modules/protect/draw_rect.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
