@@ -275,13 +275,32 @@ kernel:
   call draw_rect
   add $0x14, %sp
 
+  push $0x11223344
+  pushf
+  call $0x0008, $int_default
+
+.Lkernel_10L:
+
+  push $RTC_TIME
+  call rtc_get_time
+  add $0x4, %sp
+
+  pushl (RTC_TIME)
+  push $0x0700
+  push $0x0
+  push $72
+  call draw_time
+  add $0x10, %sp
+
+  jmp .Lkernel_10L
+
   jmp .
 
 .Lkernel_s0: .string "Hello, kernel!"
 
 .align 4
 FONT_ADR: .long 0x0
-
+RTC_TIME: .long 0x0
 
 .include "../modules/protect/vga.s"
 .include "../modules/protect/draw_char.s"
@@ -291,5 +310,9 @@ FONT_ADR: .long 0x0
 .include "../modules/protect/draw_pixel.s"
 .include "../modules/protect/draw_line.s"
 .include "../modules/protect/draw_rect.s"
+.include "../modules/protect/itoa.s"
+.include "../modules/protect/rtc.s"
+.include "../modules/protect/draw_time.s"
+.include "./modules/interrupt.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0

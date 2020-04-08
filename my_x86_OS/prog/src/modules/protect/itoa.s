@@ -24,7 +24,7 @@ itoa:
   mov 0x8(%ebp), %eax # num
   mov 0xc(%ebp), %esi # buff
   mov 0x10(%ebp), %ecx # size
-  mov 0x14(%ebp), %ebx # flag
+  mov 0x18(%ebp), %ebx # flag
 # The remaining arguments(radix: 0xa(%bp) ) will be assigend later.
   mov %esi, %edi
   add %ecx, %edi
@@ -56,7 +56,7 @@ itoa:
 .Litoa3:
 
 # convert to ascii
-  mov 0xa(%ebp), %ebx
+  mov 0x14(%ebp), %ebx
 .LitoaLOOP1:
   mov $0, %edx
   div %ebx
@@ -73,7 +73,7 @@ itoa:
   cmp $0, %ecx
   je .Litoa6
   mov $0x20, %al
-  cmp $0b0100, 0xc(%ebp)
+  cmpw $0b0100, 0x18(%ebp)
   jne .Litoa7
   mov $0x30, %al
 .Litoa7:

@@ -12,6 +12,15 @@ rtc_get_time:
 
   push %ebx
 
+  mov $0x0A, %al
+  out %al, $0x70
+  in $0x71, %al
+  test $0x80, %al
+  je .Lrtc_10F
+  mov $0x1, %eax
+  jmp .Lrtc_10E
+.Lrtc_10F:
+
   mov $0x4, %al # hour data
   out %al, $0x70
   in $0x71, %al
@@ -30,10 +39,16 @@ rtc_get_time:
 
   and $0x00FFFFFF, %eax # FF(hour) FF(minute) FF(second)
 
-  mov 0x8(%ebp), %ebp
-  mov %eax, (%ebp)
+  mov 0x8(%ebp), %ebx
+  mov %eax, (%ebx)
+
+  mov $0x0, %eax
+
+.Lrtc_10E:
 
   pop %ebx
+
   mov %ebp, %esp
+  pop %ebp
 
   ret
