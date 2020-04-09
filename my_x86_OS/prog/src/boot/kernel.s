@@ -1,4 +1,5 @@
 .include "./define.s"
+.include "./macro.s"
 
 .code32
 .global kernel
@@ -274,10 +275,21 @@ kernel:
   push $100
   call draw_rect
   add $0x14, %sp
-
+/*
   push $0x11223344
   pushf
   call $0x0008, $int_default
+*/
+  call init_int
+  set_vect 0x00, $int_zero_div
+
+  mov $0x0, %al
+  div %al
+/*
+  push %eax
+  push %edi
+  mov %edi
+*/
 
 .Lkernel_10L:
 
@@ -293,7 +305,7 @@ kernel:
   add $0x10, %sp
 
   jmp .Lkernel_10L
-
+  
   jmp .
 
 .Lkernel_s0: .string "Hello, kernel!"

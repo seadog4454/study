@@ -1,11 +1,34 @@
-int_default:
-  pushf
-  push %cs
-  push $int_stop
-  mov $.s0, %eax
-  iret
+.align 4
+IDTR: .word 8 * 256 - 1
+      .long VECT_BASE
 
-.s0: .string "<     STOP    >"
+init_int:
+  push %eax
+  push %ebx
+  push %ecx
+  push %edi
+
+  lea (int_default), %eax
+  mov $0x00088E00, %ebx
+  xchg %bx, %ax
+
+  mov $0x16, %ecx
+  mov $VECT_BASE, %edi
+.10L:
+
+  mov %ebx, (%edi)
+  mov %eax, 0x4(%edi)
+  add $0x8, %edi
+  loop .10L
+
+  lidt (IDTR)
+
+  pop %edi
+  pop %ecx
+  pop %ebx
+  pop %eax
+
+  ret
 
 int_stop:
   push %eax
@@ -95,3 +118,24 @@ int_stop:
 .p3: .string "________ "
 .s4: .ascii "   +0C:"
 .p4: .string "________ "
+
+int_default:
+  pushf
+  push %cs
+  push $int_stop
+  mov $.s0, %eax
+  iret
+
+.s0: .string "<     STOP    >"
+
+
+
+int_zero_div:
+  pushf
+  push %cs
+  push $int_stop
+
+  mov $.Lint_zero_div_s0, %eax
+  iret
+
+.Lint_zero_div_s0: .string " <   ZERO DIV  > "
