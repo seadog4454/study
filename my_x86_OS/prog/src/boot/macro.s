@@ -11,3 +11,8 @@
   pop %edi
   pop %eax
 .endm
+
+.macro outp port, val
+  mov \val, %al
+  out %al, \port
+.endm

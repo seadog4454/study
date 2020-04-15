@@ -12,6 +12,9 @@ GAS LISTING boot.s 			page 1
    8              	.set VRAM, 0x000A0000
    9              	.set KERNEL_LOAD, 0x00101000
   10              	.set VECT_BASE, 0x00100000
+  11              	
+  12              	.set RING_ITEM_SIZE, (1 << 4)
+  13              	.set RING_INDEX_MASK, (RING_ITEM_SIZE - 1)
    2              	
    3              	.code16
    4              	
@@ -55,12 +58,12 @@ GAS LISTING boot.s 			page 1
   34 0087 680000   		push $.Lboot_s0
   35 008a E85700   	  call puts
   36 008d 83C402   	  add $0x2, %sp
-  37              	
-  38 0090 B8007C   		mov $BOOT_LOAD, %ax
-  39 0093 B90002   		mov $SECT_SIZE, %cx
 GAS LISTING boot.s 			page 2
 
 
+  37              	
+  38 0090 B8007C   		mov $BOOT_LOAD, %ax
+  39 0093 B90002   		mov $SECT_SIZE, %cx
   40 0096 BB1000   	  mov $BOOT_SECT, %bx
   41 0099 83EB01   		sub $0x1, %bx
   42 009c 01C1     		add %ax, %cx
@@ -115,12 +118,12 @@ GAS LISTING boot.s 			page 1
    9 00e9 56       	  push %si #arg1: pointer of strings
   10              	
   11 00ea 8B7604   	  mov 0x4(%bp), %si
-  12              	
-  13 00ed B40E     	  mov $0x0E, %ah # output one char
-  14 00ef BB0000   	  mov $0x0000, %bx
 GAS LISTING boot.s 			page 3
 
 
+  12              	
+  13 00ed B40E     	  mov $0x0E, %ah # output one char
+  14 00ef BB0000   	  mov $0x0000, %bx
   15 00f2 FC       	  cld # DF = 0
   16              	
   17              	  
@@ -175,12 +178,12 @@ GAS LISTING boot.s 			page 1
   22 011f 0A0D5075 	s_reboot_signal: .string "\n\rPush SPACE key to reboot..."
   22      73682053 
   22      50414345 
-  22      206B6579 
-  22      20746F20 
-  23 013d 0A0D0A0D 	s_reboot_newline: .string "\n\r\n\r"
 GAS LISTING boot.s 			page 4
 
 
+  22      206B6579 
+  22      20746F20 
+  23 013d 0A0D0A0D 	s_reboot_newline: .string "\n\r\n\r"
   23      00
   24              	
   25              	
@@ -235,12 +238,12 @@ GAS LISTING boot.s 			page 1
   48              	
   49 017b B000     	  mov $0, %al
   50 017d EB0C     	  jmp .read_chs2E
-  51              	.read_chs1E:
-  52              	  
-  53 017f 3C00     	  cmp $0, %al
 GAS LISTING boot.s 			page 5
 
 
+  51              	.read_chs1E:
+  52              	  
+  53 017f 3C00     	  cmp $0, %al
   54 0181 7508     	  jne .read_chs2E
   55              	
   56 0183 B80000   	  mov $0, %ax
@@ -295,12 +298,12 @@ GAS LISTING boot.s 			page 1
    2              	.section .text
    3              	
    4              	# void itoa(num, buff, size, radix, flag)
-   5              	# num:source addr
-   6              	# buff:dist addr
-   7              	# radix:set 2, 8, 10, or 16 
 GAS LISTING boot.s 			page 6
 
 
+   5              	# num:source addr
+   6              	# buff:dist addr
+   7              	# radix:set 2, 8, 10, or 16 
    8              	# flag:When set 
    9              	#                 1st bit: 0 padding on space
   10              	#                 2nd bit: add +/- sign
@@ -355,12 +358,12 @@ GAS LISTING boot.s 			page 1
   59              	.Litoa3:
   60              	
   61              	# convert to ascii
-  62 024a 8B5E0A   	  mov 0xa(%bp), %bx
-  63              	.LitoaLOOP1:
-  64 024d BA0000   	  mov $0, %dx
 GAS LISTING boot.s 			page 7
 
 
+  62 024a 8B5E0A   	  mov 0xa(%bp), %bx
+  63              	.LitoaLOOP1:
+  64 024d BA0000   	  mov $0, %dx
   65 0250 F7F3     	  div %bx
   66 0252 89D6     	  mov %dx, %si
   67 0254 8A940000 	  movb ascii_table(%si), %dl
@@ -415,12 +418,12 @@ GAS LISTING boot.s 			page 1
    9              	
   10              	.code16
   11              	
-  12              	get_drive_param:
-  13 028d 55       	  push %bp
-  14 028e 89E5     	  mov %sp, %bp
 GAS LISTING boot.s 			page 8
 
 
+  12              	get_drive_param:
+  13 028d 55       	  push %bp
+  14 028e 89E5     	  mov %sp, %bp
   15              	
   16 0290 53       	  push %bx
   17 0291 51       	  push %cx
@@ -475,12 +478,12 @@ GAS LISTING boot.s 			page 1
    2              	 * get_font_adr(adr)
    3              	 * return: void
    4              	 * arguments:
-   5              	 *  adr: Store position of the font address
-   6              	 */
-   7              	
 GAS LISTING boot.s 			page 9
 
 
+   5              	 *  adr: Store position of the font address
+   6              	 */
+   7              	
    8              	.code16
    9              	
   10              	get_font_adr:
@@ -535,12 +538,12 @@ GAS LISTING boot.s 			page 1
    9 02ef 6653     	  push %ebx
   10 02f1 6651     	  push %ecx
   11 02f3 6652     	  push %edx
-  12 02f5 56       	  push %si
-  13 02f6 57       	  push %di
-  14 02f7 55       	  push %bp
 GAS LISTING boot.s 			page 10
 
 
+  12 02f5 56       	  push %si
+  13 02f6 57       	  push %di
+  14 02f7 55       	  push %bp
   15              	
   16 02f8 680000   	  push $.Lget_mem_info_s3
   17 02fb E8E6FD   	  call puts
@@ -595,12 +598,12 @@ GAS LISTING boot.s 			page 1
   61 0359 7516     	  jnz .Lget_mem_info_6E
   62              	  
   63 035b 680000   	  push $.Lget_mem_info_s0
-  64 035e E883FD   	  call puts
-  65 0361 83C402   	  add $2, %sp
-  66 0364 B410     	  mov $0x10, %ah
 GAS LISTING boot.s 			page 11
 
 
+  64 035e E883FD   	  call puts
+  65 0361 83C402   	  add $2, %sp
+  66 0364 B410     	  mov $0x10, %ah
   67 0366 CD16     	  int $0x16
   68 0368 680000   	  push $.Lget_mem_info_s1
   69 036b E876FD   	  call puts
@@ -655,12 +658,12 @@ GAS LISTING boot.s 			page 1
  102              	.align 4
  103 0414 00000000 	.Lget_mem_info_b0: .space E820_RECORD_SIZE
  103      00000000 
- 103      00000000 
- 103      00000000 
- 103      00000000 
 GAS LISTING boot.s 			page 12
 
 
+ 103      00000000 
+ 103      00000000 
+ 103      00000000 
  104              	
  105              	/*
  106              	 * put_mem_info(adr)
@@ -715,12 +718,12 @@ GAS LISTING boot.s 			page 1
  155 0475 E894FD   	  call itoa
  156 0478 83C40A   	  add $0xa, %sp
  157              	
- 158              	
- 159              	  # Length(64bit)
- 160 047b BB0000   	  mov $.Lput_mem_info_p3, %bx
 GAS LISTING boot.s 			page 13
 
 
+ 158              	
+ 159              	  # Length(64bit)
+ 160 047b BB0000   	  mov $.Lput_mem_info_p3, %bx
  161 047e 6A04     	  push $0b0100
  162 0480 6A10     	  push $16
  163 0482 6A04     	  push $4
@@ -775,12 +778,12 @@ GAS LISTING boot.s 			page 1
  212 04e3 53       	  push %bx
  213 04e4 FF7410   	  pushw 0x10(%si)
  214 04e7 E822FD   	  call itoa
- 215 04ea 83C40A   	  add $0xa, %sp
- 216              	
- 217 04ed 680000   	  push $.Lput_mem_info_s1
 GAS LISTING boot.s 			page 14
 
 
+ 215 04ea 83C40A   	  add $0xa, %sp
+ 216              	
+ 217 04ed 680000   	  push $.Lput_mem_info_s1
  218 04f0 E8F1FB   	  call puts
  219 04f3 83C402   	  add $2, %sp 
  220              	
@@ -835,12 +838,12 @@ GAS LISTING boot.s 			page 1
  250      50492064 
  250      61746129 
  250      0A0D00
- 251 0574 20284143 	.Lput_mem_info_s6: .string " (ACPI NVS)\n\r"
- 251      5049204E 
- 251      5653290A 
 GAS LISTING boot.s 			page 15
 
 
+ 251 0574 20284143 	.Lput_mem_info_s6: .string " (ACPI NVS)\n\r"
+ 251      5049204E 
+ 251      5653290A 
  251      0D00
  252 0582 20286261 	.Lput_mem_info_s7: .string " (bad memory)\n\r"
  252      64206D65 
@@ -895,12 +898,12 @@ GAS LISTING boot.s 			page 1
   41 05bf C3       	  ret
   42              	
   43              	
-  44              	
-  45              	/*
-  46              	 * KBC_Data_Read(data)
 GAS LISTING boot.s 			page 16
 
 
+  44              	
+  45              	/*
+  46              	 * KBC_Data_Read(data)
   47              	 * return:
   48              	 *  sucsess: Other than 0
   49              	 *  false: 0
@@ -955,12 +958,12 @@ GAS LISTING boot.s 			page 1
   98              	KBC_Cmd_Write:
   99 05e4 55       	  push %bp
  100 05e5 89E5     	  mov %sp, %bp
- 101              	
- 102 05e7 51       	  push %cx
- 103              	
 GAS LISTING boot.s 			page 17
 
 
+ 101              	
+ 102 05e7 51       	  push %cx
+ 103              	
  104 05e8 B90000   	  mov $0, %cx
  105              	.LKBC_Cmd_Write_10L:
  106              	
@@ -1015,12 +1018,12 @@ GAS LISTING boot.s 			page 1
   28              	
   29 061c FF760A   		pushw 0xa(%bp)
   30 061f FF7608   		pushw 0x8(%bp)
-  31 0622 680000   		push $.Lread_lba_chs
-  32 0625 E81AFB   		call read_chs
-  33 0628 83C406   		add $0x6, %sp
 GAS LISTING boot.s 			page 18
 
 
+  31 0622 680000   		push $.Lread_lba_chs
+  32 0625 E81AFB   		call read_chs
+  33 0628 83C406   		add $0x6, %sp
   34              	
   35 062b 5E       		pop %si
   36 062c 89EC     		mov %bp, %sp
@@ -1075,12 +1078,12 @@ GAS LISTING boot.s 			page 1
   41 0664 894504   	  mov %ax, drive.head(%di)
   42 0667 895506   	  mov %dx, drive.sect(%di)
   43              	
-  44 066a 5F       	  pop %di
-  45 066b 5E       	  pop %si
-  46 066c 5A       	  pop %dx
 GAS LISTING boot.s 			page 19
 
 
+  44 066a 5F       	  pop %di
+  45 066b 5E       	  pop %si
+  46 066c 5A       	  pop %dx
   47 066d 5B       	  pop %bx
   48 066e 58       	  pop %ax
   49              	
@@ -1135,12 +1138,12 @@ GAS LISTING boot.s 			page 1
  148 06c4 8B4704   	  mov drive.head(%bx), %ax
  149 06c7 6A04     	  push $0b0100
  150 06c9 6A10     	  push $16
- 151 06cb 6A02     	  push $2
- 152 06cd 680000   	  push $.Lboot_p3
- 153 06d0 50       	  push %ax
 GAS LISTING boot.s 			page 20
 
 
+ 151 06cb 6A02     	  push $2
+ 152 06cd 680000   	  push $.Lboot_p3
+ 153 06d0 50       	  push %ax
  154 06d1 E838FB   	  call itoa
  155 06d4 83C40A   	  add $0xa, %sp
  156              	
@@ -1195,12 +1198,12 @@ GAS LISTING boot.s 			page 1
  190 075d 83C402   	  add $2, %sp
  191              	
  192 0760 6A04     	  push $0b0100
- 193 0762 6A10     	  push $16
- 194 0764 6A04     	  push $4
- 195 0766 680000   	  push $.Lboot_3rd_p1
 GAS LISTING boot.s 			page 21
 
 
+ 193 0762 6A10     	  push $16
+ 194 0764 6A04     	  push $4
+ 195 0766 680000   	  push $.Lboot_3rd_p1
  196 0769 FF360000 	  pushw (FONT.seg)
  197 076d E89CFA   	  call itoa
  198 0770 83C40A   	  add $0xa, %sp
@@ -1255,12 +1258,12 @@ GAS LISTING boot.s 			page 1
  246      73746167 
  246      652E2E2E 
  246      0A0D00
- 247 07da 20466F6E 	.Lboot_3rd_s1: .ascii " Font address="
- 247      74206164 
- 247      64726573 
 GAS LISTING boot.s 			page 22
 
 
+ 247 07da 20466F6E 	.Lboot_3rd_s1: .ascii " Font address="
+ 247      74206164 
+ 247      64726573 
  247      733D
  248 07e8 5A5A5A5A 	.Lboot_3rd_p1: .ascii "ZZZZ:"
  248      3A
@@ -1315,12 +1318,12 @@ GAS LISTING boot.s 			page 1
  293 0852 FB       	  sti
  294              	 
  295 0853 680000   	  push $.Lstage_4_s1
- 296 0856 E88BF8   	  call puts
- 297 0859 83C402   	  add $0x2, %sp
- 298              	
 GAS LISTING boot.s 			page 23
 
 
+ 296 0856 E88BF8   	  call puts
+ 297 0859 83C402   	  add $0x2, %sp
+ 298              	
  299 085c 680000   	  push $.Lstage_4_s2
  300 085f E882F8   	  call puts
  301 0862 83C402   	  add $0x2, %sp
@@ -1375,12 +1378,12 @@ GAS LISTING boot.s 			page 1
  349 08b6 680000   	  push $.Lstage_4_e1
  350 08b9 FF360000 	  pushw (.Lstage_4_key)
  351 08bd E84CF9   	  call itoa
- 352 08c0 83C40A   	  add $0xA, %sp
- 353              	
- 354 08c3 680000   	  push $.Lstage_4_e0
 GAS LISTING boot.s 			page 24
 
 
+ 352 08c0 83C40A   	  add $0xA, %sp
+ 353              	
+ 354 08c3 680000   	  push $.Lstage_4_e0
  355 08c6 E81BF8   	  call puts
  356 08c9 83C402   	  add $0x2, %sp
  357              	
@@ -1435,12 +1438,12 @@ GAS LISTING boot.s 			page 1
  393 093b 680000   		push $drive_tmp
  394 093e E8C1FC   		call read_lba
  395 0941 83F810   	  cmp $KERNEL_SECT, %ax
- 396 0944 740C     		jz .Lstage5_10E
- 397 0946 680000   		push $.Lstage5_e0
- 398 0949 E898F7   		call puts
 GAS LISTING boot.s 			page 25
 
 
+ 396 0944 740C     		jz .Lstage5_10E
+ 397 0946 680000   		push $.Lstage5_e0
+ 398 0949 E898F7   		call puts
  399 094c 83C402   		add $0x2, %sp
  400 094f E8B1F7   		call reboot
  401              	.Lstage5_10E:
@@ -1495,12 +1498,12 @@ GAS LISTING boot.s 			page 1
  433      0092CF00 
  434              	.gdt_end:
  435              	
- 436              	.set SEL_CODE, .cs - GDT
- 437              	.set SEL_DATA, .ds - GDT
- 438              	
 GAS LISTING boot.s 			page 26
 
 
+ 436              	.set SEL_CODE, .cs - GDT
+ 437              	.set SEL_DATA, .ds - GDT
+ 438              	
  439 09e4 1700     	GDTR: .word .gdt_end - GDT - 1 
  440 09e6 00000000 	      .long GDT
  441              	
@@ -1555,9 +1558,12 @@ GAS LISTING boot.s 			page 1
  483 0a34 00000000 	.fill BOOT_SIZE - (. - _start), 0x1, 0x0 # padding, 0x2000 = BOOT_SIZE
  483      00000000 
  483      00000000 
- 483      00000000 
- 483      00000000 
 GAS LISTING boot.s 			page 27
+
+
+ 483      00000000 
+ 483      00000000 
+GAS LISTING boot.s 			page 28
 
 
 DEFINED SYMBOLS
@@ -1571,6 +1577,8 @@ DEFINED SYMBOLS
           ./define.s:8      *ABS*:00000000000a0000 VRAM
           ./define.s:9      *ABS*:0000000000101000 KERNEL_LOAD
           ./define.s:10     *ABS*:0000000000100000 VECT_BASE
+          ./define.s:12     *ABS*:0000000000000010 RING_ITEM_SIZE
+          ./define.s:13     *ABS*:000000000000000f RING_INDEX_MASK
               boot.s:8      .text:0000000000000000 _start
               boot.s:15     .text:000000000000005a ipl
               boot.s:71     .text:00000000000000dc drive_tmp
@@ -1615,11 +1623,11 @@ DEFINED SYMBOLS
               boot.s:385    .text:000000000000092b stage5
               boot.s:408    .text:000000000000097c stage6
               boot.s:448    .text:00000000000009f0 stage7
+GAS LISTING boot.s 			page 29
+
+
               boot.s:431    .text:00000000000009cc GDT
               boot.s:432    .text:00000000000009d4 .cs
-GAS LISTING boot.s 			page 28
-
-
               boot.s:433    .text:00000000000009dc .ds
               boot.s:434    .text:00000000000009e4 .gdt_end
               boot.s:436    *ABS*:0000000000000008 SEL_CODE
