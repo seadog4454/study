@@ -72,6 +72,11 @@ kernel:
   cmp $0x0, %eax
   je .Lkernel_10E
 
+  push $_KEY_BUFF
+  push $29
+  push $2
+  call draw_key
+  add $0xc, %sp
 
 .Lkernel_10E:
   jmp .Lkernel_10L 

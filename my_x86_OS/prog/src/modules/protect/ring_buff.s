@@ -85,6 +85,8 @@ draw_key:
   and $RING_INDEX_MASK, %ebx
   mov (%esi, %ebx), %al
 
+
+
   push $0b0100
   push $0x10
   push $0x2
@@ -116,14 +118,13 @@ draw_key:
 
 .section .data
 
-ring_buff:
-  .struct 0
-ring_buff.rp:
-  .struct ring_buff.rp + 4
-ring_buff.wp:
-  .struct ring_buff.wp + RING_ITEM_SIZE
-ring_buff.item:
+ring_buff: .struct 0
+ring_buff.rp: .struct ring_buff.rp + 4
+ring_buff.wp: .struct ring_buff.wp + 4
+ring_buff.item: .struct ring_buff.item + RING_ITEM_SIZE
+ring_buff.end:
 
-.set ring_buff.size, 0x4
+#.set ring_buff.size, 0x4
+.set ring_buff.size, ring_buff.end - ring_buff.rp
 
 .section .text
