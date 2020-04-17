@@ -19,16 +19,19 @@ kernel:
   call init_pic
 
   set_vect 0x00, $int_zero_div
+  set_vect 0x20, $int_timer
   set_vect 0x21, $int_keyboard
   set_vect 0x28, $int_rtc
 
   push $0x10
   call rtc_int_en
   add $0x4, %esp
+  call int_en_timer0
 
+  outp $0x21, $0b11111000# enable slavePIC/KBC/timer
   #outp $0x21, $0b11111011
-  outp $0x21, $0b11111001
-  outp $0xA1, $0b11111110
+  #outp $0x21, $0b11111001
+  outp $0xA1, $0b11111110 # enable RTC
 
   sti
 
@@ -64,6 +67,8 @@ kernel:
   push $72
   call draw_time
   add $0x10, %sp
+
+  call draw_rotation_bar
 
   push $.int_key
   push $_KEY_BUFF
@@ -105,5 +110,8 @@ RTC_TIME: .long 0x0
 .include "../modules/protect/interrupt.s"
 .include "../modules/protect/int_keyboard.s"
 .include "../modules/protect/ring_buff.s"
+.include "./modules/int_timer.s"
+.include "../modules/protect/timer.s"
+.include "../modules/protect/draw_rotation_bar.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
