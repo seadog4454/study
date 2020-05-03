@@ -14,7 +14,19 @@ kernel:
   shl $0x4, %eax # offset
   add %ebx, %eax
   mov %eax, (FONT_ADR)
-  
+
+
+  set_desc1 $GDT.tss_0, $TSS_0
+  set_desc1 $GDT.tss_1, $TSS_1
+  set_desc2 $GDT.ldt, $LDT, $LDT_LIMIT
+
+  lgdt (GDTR)
+
+  mov $SP_TASK_0, %esp
+
+  mov $SS_TASK_0, %ax
+  ltr %ax
+
   call init_int
   call init_pic
 
@@ -56,6 +68,9 @@ kernel:
   call draw_str
   add $0x10, %sp
 
+  #call SS_TASK_1, $0x0
+  call $0x28, $0x0
+
 .Lkernel_10L:
 
 
@@ -93,6 +108,10 @@ FONT_ADR: .long 0x0
 RTC_TIME: .long 0x0
 .int_key: .long 0x0
 
+
+.include "descriptor.s"
+.include "modules/int_timer.s"
+.include "tasks/task_1.s"
 .include "../modules/protect/vga.s"
 .include "../modules/protect/draw_char.s"
 .include "../modules/protect/draw_font.s"
@@ -110,7 +129,6 @@ RTC_TIME: .long 0x0
 .include "../modules/protect/interrupt.s"
 .include "../modules/protect/int_keyboard.s"
 .include "../modules/protect/ring_buff.s"
-.include "./modules/int_timer.s"
 .include "../modules/protect/timer.s"
 .include "../modules/protect/draw_rotation_bar.s"
 

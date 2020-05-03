@@ -16,3 +16,37 @@
   mov \val, %al
   out %al, \port
 .endm
+
+.macro set_desc1 descriptoraddr, baseaddr
+  push %eax
+  push %edi
+
+  mov \descriptoraddr, %edi
+  mov \baseaddr, %eax
+
+  mov %ax, 0x2(%edi)
+  shr $0x10, %eax
+  mov %al, 0x4(%edi)
+  mov %ah, 0x7(%edi)
+
+  pop %edi
+  pop %eax
+.endm
+
+
+.macro set_desc2 descriptoraddr, baseaddr, limit
+  push %eax
+  push %edi
+
+  mov \descriptoraddr, %edi
+  mov \baseaddr, %eax
+  movw \limit, (%edi)
+
+  mov %ax, 0x2(%edi)
+  shr $0x10, %eax
+  mov %al, 0x4(%edi)
+  mov %ah, 0x7(%edi)
+
+  pop %edi
+  pop %eax
+.endm
