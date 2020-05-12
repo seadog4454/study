@@ -66,6 +66,7 @@ GDT.ds_kernel: .quad 0x00CF92000000FFFF # DATA 4G
 GDT.ldt: .quad 0x0000820000000000
 GDT.tss_0: .quad 0x0000890000000067
 GDT.tss_1: .quad 0x0000890000000067
+GDT.call_gate: .quad 0x0000EC0400080000
 GDT.GDT_end:
 
 .set CS_KERNEL, GDT.cs_kernel - GDT
@@ -73,6 +74,7 @@ GDT.GDT_end:
 .set SS_LDT, GDT.ldt - GDT
 .set SS_TASK_0, GDT.tss_0 - GDT
 .set SS_TASK_1, GDT.tss_1 - GDT
+.set SS_GATE_0, GDT.call_gate - GDT
 
 GDTR: .word GDT.GDT_end - GDT - 1
 .long GDT
@@ -82,14 +84,14 @@ GDTR: .word GDT.GDT_end - GDT - 1
 LDT: .quad 0x0000000000000000
 LDT.cs_task_0: .quad 0x00CF9A000000FFFF # CODE 4G
 LDT.ds_task_0: .quad 0x00CF92000000FFFF # DATA 4G
-LDT.cs_task_1: .quad 0x00CF9A000000FFFF # CODE 4G
-LDT.ds_task_1: .quad 0x00CF92000000FFFF # DATA 4G
+LDT.cs_task_1: .quad 0x00CFFA000000FFFF # CODE 4G
+LDT.ds_task_1: .quad 0x00CFF2000000FFFF # DATA 4G
 LDT.LDT_end:
 
 .set CS_TASK_0, (LDT.cs_task_0 - LDT) | 4
 .set DS_TASK_0, (LDT.ds_task_0 - LDT) | 4
-.set CS_TASK_1, (LDT.cs_task_1 - LDT) | 4
-.set DS_TASK_1, (LDT.ds_task_1 - LDT) | 4
+.set CS_TASK_1, (LDT.cs_task_1 - LDT) | 4 | 3
+.set DS_TASK_1, (LDT.ds_task_1 - LDT) | 4 | 3
 
 .set LDT_LIMIT, LDT.LDT_end - LDT - 1
 

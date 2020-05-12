@@ -12,6 +12,23 @@
   pop %eax
 .endm
 
+
+.macro set_vect2 interruptNum, funcAddr, flag
+  push %eax
+  push %edi
+  mov $VECT_BASE + (\interruptNum * 8), %edi
+  mov \funcAddr, %eax
+
+  movw \flag, 0x4(%edi)
+
+  mov %ax, (%edi)
+  shr $0x10, %eax
+  mov %ax, 0x6(%edi)
+
+  pop %edi
+  pop %eax
+.endm
+
 .macro outp port, val
   mov \val, %al
   out %al, \port
@@ -46,6 +63,21 @@
   shr $0x10, %eax
   mov %al, 0x4(%edi)
   mov %ah, 0x7(%edi)
+
+  pop %edi
+  pop %eax
+.endm
+
+.macro set_gate descriptoraddr, baseaddr
+  push %eax
+  push %edi
+  
+  mov \descriptoraddr, %edi
+  mov \baseaddr, %eax
+
+  mov %ax, (%edi)
+  shr $0x10, %eax
+  mov %ax, 0x6(%edi)
 
   pop %edi
   pop %eax

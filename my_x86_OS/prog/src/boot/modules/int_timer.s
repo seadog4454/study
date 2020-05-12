@@ -11,6 +11,19 @@ int_timer:
 
   outp $0x20, $0x20
 
+  str %ax
+  cmp $SS_TASK_0, %ax
+  je 11f
+
+  jmp $SS_TASK_0, $0x0
+  jmp 10f
+
+11:
+  jmp $SS_TASK_1, $0x0
+  jmp 10f
+
+10:
+
   pop %es
   pop %ds
   popa

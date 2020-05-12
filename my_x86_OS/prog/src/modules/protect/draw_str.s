@@ -29,13 +29,16 @@ draw_str:
   cmp $0x0, %al
   je .Ldraw_str_10E
 
+.ifdef USE_SYSTEM_CALL
+  int $0x81
+.else
   push %eax
   push %ebx
   push %edx
   push %ecx
   call draw_char
   add $0x10, %sp
-
+.endif
 
 
   inc %ecx

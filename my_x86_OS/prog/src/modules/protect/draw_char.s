@@ -21,6 +21,12 @@ draw_char:
   push %esi
   push %edi
 
+.ifdef USE_TEST_AND_SET
+  push $IN_USE
+  call test_and_set
+  add $0x4, %sp
+.endif
+
   # get font addr
   movzxb 0x14(%ebp), %esi # font addr
   shl $0x4, %esi
@@ -96,6 +102,10 @@ draw_char:
   call vram_font_copy
   add $0x10, %sp
 
+.ifdef USE_TEST_AND_SET
+  movl $0x0, (IN_USE)
+.endif
+
   pop %edi
   pop %esi
   pop %edx
@@ -107,3 +117,8 @@ draw_char:
   pop %ebp
 
   ret
+
+.ifdef USE_TEST_AND_SET
+  .align 0x4
+  IN_USE: .long 0x0
+.endif

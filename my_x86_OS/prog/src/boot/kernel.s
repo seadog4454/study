@@ -1,3 +1,6 @@
+.set USE_SYSTEM_CALL, 0x1
+.set USE_TEST_AND_SET, 0x1
+
 .include "./define.s"
 .include "./macro.s"
 
@@ -18,6 +21,9 @@ kernel:
 
   set_desc1 $GDT.tss_0, $TSS_0
   set_desc1 $GDT.tss_1, $TSS_1
+
+  set_gate $GDT.call_gate, $call_gate
+
   set_desc2 $GDT.ldt, $LDT, $LDT_LIMIT
 
   lgdt (GDTR)
@@ -34,6 +40,8 @@ kernel:
   set_vect 0x20, $int_timer
   set_vect 0x21, $int_keyboard
   set_vect 0x28, $int_rtc
+  set_vect2 0x81, $trap_gate_81, $0xEF00
+  set_vect2 0x82, $trap_gate_82, $0xEF00
 
   push $0x10
   call rtc_int_en
@@ -69,19 +77,21 @@ kernel:
   add $0x10, %sp
 
   #call SS_TASK_1, $0x0
-  call $0x28, $0x0
+  #call $0x28, $0x0
 
 .Lkernel_10L:
 
+  #jmp $SS_TASK_1, $0x0
+  jmp $0x28, $0x0
 
   mov (RTC_TIME), %eax
 
-  push %eax
-  push $0x0700
-  push $0x0
-  push $72
-  call draw_time
-  add $0x10, %sp
+#  push %eax
+#  push $0x0700
+#  push $0x0
+#  push $72
+#  call draw_time
+#  add $0x10, %sp
 
   call draw_rotation_bar
 
@@ -112,6 +122,7 @@ RTC_TIME: .long 0x0
 .include "descriptor.s"
 .include "modules/int_timer.s"
 .include "tasks/task_1.s"
+
 .include "../modules/protect/vga.s"
 .include "../modules/protect/draw_char.s"
 .include "../modules/protect/draw_font.s"
@@ -131,5 +142,8 @@ RTC_TIME: .long 0x0
 .include "../modules/protect/ring_buff.s"
 .include "../modules/protect/timer.s"
 .include "../modules/protect/draw_rotation_bar.s"
+.include "../modules/protect/call_gate.s"
+.include "../modules/protect/trap_gate.s"
+.include "../modules/protect/test_and_set.s"
 
 .fill KERNEL_SIZE - (. - kernel), 0x1, 0x0
